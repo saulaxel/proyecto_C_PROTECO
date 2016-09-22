@@ -4,7 +4,7 @@
  * Tarea n: RealizaciOn de una base de datos sencilla en c
  **/
 
-// Incluir informaciOn requerida
+// InclusiOn de informaciOn requerida
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -19,8 +19,9 @@
 	#define CLEAR "" // No pos si asI esta la cosa mejor no hagas nada
 #endif // _WIN32
 
+#define LONG_NOMBRE_PERSONA 60
 #define ARCHIVO_USUARIOS "mis_usuarios.txt"
-#define ARCHIVO_PRODUCTOS "mis_productos.txt"
+#define ARCHIVO_DISCOS "mis_discos.txt"
 
 #define z(s,c) printf("%s %s\n%s %s\n",s->cuenta,c->cuenta,s->contrasena,c->contrasena)
 // Estructura que simula booleanos
@@ -28,12 +29,15 @@ enum booleano { falso, verdadero };
 typedef enum booleano Booleano;
 
 // Estructura para los usuarios
+#define CTA_ADMIN "admin"
+#define CONTRA_ADMIN "admin"
 #define LONGITUD_CUENTA 30
 #define LONGITUD_CONTRASENA 16
 #define MAX_USUARIOS 5
 struct usuario{
 	unsigned char cuenta[LONGITUD_CUENTA+1];
 	unsigned char contrasena[LONGITUD_CONTRASENA+1];
+	unsigned char nombre_usuario[LONG_NOMBRE_PERSONA+1];
 	struct usuario *siguiente;
 	struct usuario *anterior;
 };
@@ -46,24 +50,26 @@ struct listaUsuarios{
 };
 typedef struct listaUsuarios ListaUsuarios;
 
-// Estructura para los productos
-#define LONG_NOMBRE_PRODUCTO 30
-#define MAX_PRODUCTOS 20
-struct producto{
-	unsigned char nombre[LONG_NOMBRE_PRODUCTO+1];
-	int cantidad;
+// Estructura para los discos
+#define LONG_NOMBRE_DISCO 100
+#define MAX_DISCOS 1000
+struct disco{
+	unsigned char nombre_artista[LONG_NOMBRE_PERSONA+1];
+	unsigned char nombre_disco[LONG_NOMBRE_DISCO+1];
 	float precio;
-	struct producto *anterior;
-	struct producto *siguiente;
+	int anio_lanzamiento;
+	int numero_compras;
+	struct disco *anterior;
+	struct disco *siguiente;
 };
-typedef struct producto Producto;
+typedef struct disco Disco;
 
-struct listaProductos{
-	Producto *primero;
-	Producto *ultimo;
-	unsigned short num_productos;
+struct listaDiscos{
+	Disco *primero;
+	Disco  *ultimo;
+	unsigned short num_discos;
 };
-typedef struct listaProductos ListaProductos;
+typedef struct listaDiscos ListaDiscos;
 
 // Prototipos de funciOn
 
@@ -76,21 +82,22 @@ void menu( void );
 
 /**
  * FunciOn establecerUsuariosIniciales: apuntador a cadena,
-				        estructura ListaUsuarios -> vacio
- * DescripciOn: Permite al usuario ingresar usuarios 
- * iniciales antes de solicitar datos para el ingreso
+				        apuntador a estructura ListaUsuarios -> vacio
+ * DescripciOn: Manda a llamar a la funciOn que lee los usuarios de la 
+ * base de datos. En caso de no haber base de datos este la crea
+ * con los datos de administrador.
  **/
 void establecerUsuariosIniciales( Usuario *usr, ListaUsuarios *misUsuarios );
 
 /**
- * FunciOn leerBD_Usuarios: estructura ListaUsuarios -> vacio
+ * FunciOn leerBD_Usuarios: apuntador a estructura ListaUsuarios -> vacio
  * DescripciOn: Lee la lista de usuarios del archivo
  *  base de datos y los guarda en la lista de usuarios recibida
  **/
 void leerBD_Usuarios( ListaUsuarios *misUsuarios );
 
 /**
- * FunciOn escribirBD_Usuarios: estructura ListaUsuarios -> vacio
+ * FunciOn escribirBD_Usuarios: apuntador estructura ListaUsuarios -> vacio
  * DescripciOn: Escribe los datos de ListaUsuarios en el archivo
  *  usado como base de datos
  **/
@@ -118,13 +125,13 @@ void cambiarUsuario( Usuario *usr, ListaUsuarios *misUsuarios );
 void leerDatosUsuario( unsigned char *usr, unsigned char *contra);
 
 /**
- * FunciOn comprobarUsuario: estructura Usuario,
+ * FunciOn existeUsuario: estructura Usuario,
                              estructura ListaUsuarios -> estructura Booleano
  * DescripciOn: Pide al usuario sus datos y los comprueba con la
  *  base de datos actual para devolver si el usuario se encuentra
  *  o no registrado
  **/
-Booleano comprobarUsuario( Usuario *usr, ListaUsuarios *misUsuarios);
+Booleano existeUsuario( Usuario *usr, ListaUsuarios *misUsuarios);
  
 /**
  * FunciOn crearUsuario: vacio -> apuntador a Usuario
@@ -134,73 +141,74 @@ Booleano comprobarUsuario( Usuario *usr, ListaUsuarios *misUsuarios);
 Usuario * crearUsuario( void );
 
 /**
- * FunciOn agregarUsuario: apuntador estructura Usuario, 
- * 			   estructura ListaUsuarios ->  
+ * FunciOn agregarUsuario: apuntador a estructura Usuario, 
+ * 			   apuntador a estructura ListaUsuarios ->  
  *			   enumeraciOn Booleano
  * DescripciOn: Recibe un usuario nuevo y lo almacena en la lista 
- *  especificada
+ *  de usuarios si no existe su cuenta
  **/
 Booleano agregarUsuario( Usuario *usr, ListaUsuarios *misUsuarios );
 
 /**
- * FunciOn eliminarUsuario: estructura Usuario,
- * 			    estructura ListaUsuarios -> vacio
+ * FunciOn eliminarUsuario: apuntador a estructura Usuario,
+ * 			    apuntador a estructura ListaUsuarios -> vacio
  * DescripciOn: Hace una busqueda lineal de la cadena recibida
  *  sobre las cuentas de los usuarios y en la primera coincidencia
  *  eliminarA el usuario actual de la lista y de la memoria 
  *  regresando a la funciOn que lo llamo verdadero, o falso al no
  *  encontrar ninguna concidencia
+ + PS: No elimina al administrador(por ello lo recibe)
  **/
 void eliminarUsuario( Usuario *adm, ListaUsuarios *misUsuarios );
 
 /**
- * FunciOn leerBD_Productos: estructura ListaProductos -> vacio
- * DescripciOn: Consulta el archivo base de datos de productos
+ * FunciOn leerBD_Discos: estructura ListaDiscos -> vacio
+ * DescripciOn: Consulta el archivo base de datos de discos
  *  y guarda su informaciOn en una lista de usuarios
  **/
-void leerBD_Productos( ListaProductos *misProductos );
+void leerBD_Discos( ListaDiscos *misDiscos );
 
 /**
- * FunciOn escribirBD_Productos: esctuctura ListaProductos -> vacio
- * DescripciOn: Escribe los datos de la lista de productos en 
- *  el archivo de base de datos de productos sobreescribiendola
+ * FunciOn escribirBD_Discos: esctuctura ListaDiscos -> vacio
+ * DescripciOn: Escribe los datos de la lista de discos en 
+ *  el archivo de base de datos de discos sobreescribiendola
  *  en cada ocaciOn
  **/
-void escribirBD_Productos( ListaProductos *misProductos );
+void escribirBD_Discos( ListaDiscos *misDiscos );
 
 /**
- * FunciOn mostrarProductos: vacio -> vacio
+ * FunciOn mostrarDiscos: vacio -> vacio
  * DescripciOn: Imprime en pantalla los datos de la base de 
- *  datos de los productos
+ *  datos de los discos
  **/
-void mostrarProductos( void );
+void mostrarDiscos( void );
 
 /**
- * FunciOn crearProducto: vacio -> apuntador a Producto
- * DescripciOn: Se encarga de instanciar un nuevo producto por 
+ * FunciOn crearDisco: vacio -> apuntador a Disco
+ * DescripciOn: Se encarga de instanciar un nuevo disco por 
  *  medio de memoria dinAmica e inicializado con datos pedidos
  *  por consola para al final regresar una referencia al mismo.
  **/
-Producto * crearProducto(void);
+Disco * crearDisco(void);
 
 /**
- * FunciOn agregarProducto: apuntador a estrucutra Producto,
- *   	         	    estructura ListaProductos 
+ * FunciOn agregarDisco: apuntador a estrucutra Disco,
+ *   	         	    estructura ListaDiscos 
  *			    -> enumeraciOn Booleano 
- * DescripciOn: Recibe un nuevo producto y lo almacena en la
+ * DescripciOn: Recibe un nuevo disco y lo almacena en la
  *  lista especificada como argumento
  **/
-Booleano agregarProducto( Producto * nvo, ListaProductos *misProductos);
+Booleano agregarDisco( Disco * nvo, ListaDiscos *misDiscos );
 
 /**
- * FunciOn eliminarProducto: apuntador a cadena,
- *                           estructura ListaProductos -> vacio
+ * FunciOn eliminarDisco: apuntador a cadena,
+ *                           estructura ListaDiscos -> vacio
  * DescripciOn: Hace una busqueda lineal de la cadena recibida en 
- *  comparaciOn con los nombres de los productos, borrando el producto
+ *  comparaciOn con los nombres de los discos, borrando el disco
  *  coincidente y regresando verdadero en el proceso, o de lo contrario 
  *  regresando falso al no encontrar coincidencias.
  **/
-void eliminarProducto( Usuario *adm, ListaProductos *misProductos );
+void eliminarDisco( Usuario *adm, ListaDiscos *misDiscos );
 
 /**
  * FunciOn leerLinea: vacio -> vacio
@@ -209,15 +217,15 @@ void eliminarProducto( Usuario *adm, ListaProductos *misProductos );
 void leerLinea( void );
 
 int main(void){
-    ListaProductos misProductos = { NULL, NULL, 0 };
+    ListaDiscos misDiscos = { NULL, NULL, 0 };
     ListaUsuarios misUsuarios = { NULL, NULL, 0 };
     short condicion = 0;
-    Usuario administrador = { {0}, {0}, NULL, NULL };
+    Usuario administrador = { {0}, {0}, {0}, NULL, NULL };
     
     system(CLEAR);
     // Recuperar los datos de la base de datos
     leerBD_Usuarios( &misUsuarios );
-    leerBD_Productos( &misProductos );
+    leerBD_Discos( &misDiscos );
     printf("\n\t_____________________________________________\n");
     printf("\tLas bases de datos se han leido correctamente\n\n");
     // Si la base de datos de usuarios esta vacia --> La aplicacion no
@@ -238,7 +246,7 @@ int main(void){
 	    break;
 
 	    case 2:
-		mostrarProductos();
+		mostrarDiscos();
 	    break;
 
 	    case 3:
@@ -264,23 +272,23 @@ int main(void){
 	    break;
 
 	    case 5:
-		if( misProductos.num_productos < MAX_PRODUCTOS ){
-		    if( agregarProducto( crearProducto(), &misProductos ) ){
-			printf("Hay un total de %d producto(s)\n",
-				misProductos.num_productos);
-			escribirBD_Productos( &misProductos );
+		if( misDiscos.num_discos < MAX_DISCOS ){
+		    if( agregarDisco( crearDisco(), &misDiscos ) ){
+			printf("Hay un total de %d disco(s)\n",
+				misDiscos.num_discos);
+			escribirBD_Discos( &misDiscos );
 			}
 		}else{
 			printf("Lo sentimos, se ha alcanzado el máximo número\n");
-			printf("de productos\n");
+			printf("de discos\n");
 			getchar();
 		}
 		getchar();
 	    break;
 
 	    case 6:
-		if( misProductos.num_productos >= 1 ){
-		    eliminarProducto( &administrador, &misProductos );
+		if( misDiscos.num_discos >= 1 ){
+		    eliminarDisco( &administrador, &misDiscos );
 		}
 	    break;
 	    
@@ -310,11 +318,11 @@ int main(void){
 // Contenido de la funciOn "menu"
 void menu(){
     printf("\t 1) Mostrar usuarios guardados\n");
-    printf("\t 2) Mostrar productos guardados\n");
+    printf("\t 2) Mostrar discos guardados\n");
     printf("\t 3) Agregar usuario\n");
     printf("\t 4) Eliminar usuario\n");
-    printf("\t 5) Agregar producto\n");
-    printf("\t 6) Eliminar producto\n");
+    printf("\t 5) Agregar discos\n");
+    printf("\t 6) Eliminar disco\n");
     printf("\t 7) Cambiar de usuario\n");
     printf("\t 8) Salir\n");
 }
@@ -336,7 +344,7 @@ void establecerUsuariosIniciales( Usuario *usr, ListaUsuarios *misUsuarios ){
 	    getchar();
 	}
     }else{
-	if( comprobarUsuario( usr, misUsuarios ) == falso ){
+	if( existeUsuario( usr, misUsuarios ) == falso ){
 
 	    printf("Lo sentimos, el nombre de usuario o contraseña\n");
 	    printf("no son validos, pida al administrador que le de\n");
@@ -474,8 +482,8 @@ void leerDatosUsuario( unsigned char *cta, unsigned char *contra){
     putchar('\n');
 }
 
-// Contenido de la funciOn "comprobarUsuario"
-Booleano comprobarUsuario( Usuario *usr, ListaUsuarios *misUsuarios ){
+// Contenido de la funciOn "existeUsuario"
+Booleano existeUsuario( Usuario *usr, ListaUsuarios *misUsuarios ){
     Usuario *aux = misUsuarios->primero;
     int i;
 
@@ -633,155 +641,167 @@ void eliminarUsuario( Usuario *adm, ListaUsuarios *misUsuarios ){
     }
 }
 
-// Contenido de la funciOn "leerBD_Productos"
-void leerBD_Productos( ListaProductos *misProductos ){
-    FILE *ap_BD_productos = fopen(ARCHIVO_PRODUCTOS,"r");
-    Producto *nvo;
+// Contenido de la funciOn "leerBD_Discos"
+void leerBD_Discos( ListaDiscos *misDiscos ){
+    FILE *ap_BD_discos = fopen(ARCHIVO_DISCOS,"r");
+    Disco *nvo;
 
-    printf("Leyendo la base de datos de productos...\n");
+    printf("Leyendo la base de datos de discos...\n");
     getchar();
 
-    if( ap_BD_productos ){
+    if( ap_BD_discos ){
 
-        while( !feof(ap_BD_productos) ){
-            nvo = (Producto*) malloc( sizeof(Producto) );
-            fscanf(ap_BD_productos,"%30[^\t]\t",nvo->nombre);
-	    fscanf(ap_BD_productos,"%d\t",&nvo->cantidad);
-	    fscanf(ap_BD_productos,"%f\t\n",&nvo->precio);
+        while( !feof(ap_BD_discos) ){
+            nvo = (Disco*) malloc( sizeof(Disco) );
+            fscanf(ap_BD_discos,"%60[^\t]\t",nvo->nombre_artista);
+	    fscanf(ap_BD_discos,"%100[^\t]\t",nvo->nombre_disco);
+	    fscanf(ap_BD_discos,"%f\t",&nvo->precio);
+	    fscanf(ap_BD_discos,"%d\t",&nvo->anio_lanzamiento);
+	    fscanf(ap_BD_discos,"%d\t\n",&nvo->numero_compras);
 
-            printf("Se ha leido un producto\n");
-	    printf("Sus datos son %s %d %.2f\n",nvo->nombre,nvo->cantidad,nvo->precio);
-	    agregarProducto( nvo, misProductos );
+            printf("Se ha leido un discos\n");
+	    printf(
+		    "Sus datos son:\n%s\n%s\n%.2f %d %d\n",
+		    nvo->nombre_artista,nvo->nombre_disco,
+		    nvo->precio, nvo->anio_lanzamiento,
+		    nvo->numero_compras
+		  );
+	    agregarDisco( nvo, misDiscos );
 	}
 
-	printf("La base de datos de productos se ha leido completamente\n");
+	printf("La base de datos de discos se ha leido completamente\n");
 	printf("Sus datos son\n");
 
-	int i;
-	Producto *aux = misProductos->primero;
-	for( i = 1; i <= misProductos->num_productos; ++i ){
-	    printf("%d %s %d %.2f\n", i, aux->nombre, aux->cantidad, aux->precio); 
-	    aux = aux->siguiente;
-	}
-
-	fclose(ap_BD_productos);
     }else{
-	printf("No hay productos guardados\n");
+	printf("No hay discos guardados\n");
     }
 
-    escribirBD_Productos( misProductos );
+    escribirBD_Discos( misDiscos );
     getchar();
 }
 
-// Contenido de la funciOn "escribirBD_Productos"
-void escribirBD_Productos( ListaProductos *misProductos ){
-    FILE *ap_BD_productos = fopen(ARCHIVO_PRODUCTOS,"w");
-    Producto *aux = misProductos->primero;
+// Contenido de la funciOn "escribirBD_Discos"
+void escribirBD_Discos( ListaDiscos *misDiscos ){
+    FILE *ap_BD_discos = fopen(ARCHIVO_DISCOS,"w");
+    Disco *aux = misDiscos->primero;
     int i;
 
-    for( i = 1; i <= misProductos->num_productos; ++i){
-	fprintf(ap_BD_productos,"%s\t%d\t%.2f\t\n",aux->nombre,aux->cantidad, aux->precio);
+    for( i = 1; i <= misDiscos->num_discos; ++i){
+	fprintf( 
+		 ap_BD_discos,"%s\t%s\t%.2f\t%2d\t%d\t\n",
+		 aux->nombre_artista,aux->nombre_disco,
+		 aux->precio,aux->anio_lanzamiento,
+		 aux->numero_compras
+	       );
 	aux = aux->siguiente;
     }
     
-    fclose(ap_BD_productos);
+    fclose(ap_BD_discos);
 }
 
-// Contenido de la funciOn "mostrarProductos"
-void mostrarProductos( void ){
-    FILE *ap_BD_productos = fopen(ARCHIVO_PRODUCTOS,"r");
-    unsigned char cadena[LONG_NOMBRE_PRODUCTO+1];
+// Contenido de la funciOn "mostrarDiscos"
+void mostrarDiscos( void ){
+    FILE *ap_BD_discos = fopen(ARCHIVO_DISCOS,"r");
+    unsigned char cadena[LONG_NOMBRE_DISCO+1];
     unsigned int entero;
     float flotante;
 
     int i = 1;
 
-    if( ap_BD_productos ){
+    if( ap_BD_discos ){
 	
-	while( !feof(ap_BD_productos) ){
+	while( !feof(ap_BD_discos) ){
 	    printf("%2d",i);
-	    fscanf(ap_BD_productos,"%30[^\t]\n",cadena);
+	    fscanf(ap_BD_discos,"%30[^\t]\n",cadena);
 	    printf("\t%30s",cadena);
-	    fscanf(ap_BD_productos,"%d\t",&entero);
+	    fscanf(ap_BD_discos,"%d\t",&entero);
 	    printf("\t%10d",entero);
-	    fscanf(ap_BD_productos,"%f\t\n",&flotante);
+	    fscanf(ap_BD_discos,"%f\t\n",&flotante);
 	    printf("\t%.2f\n",flotante);
 	    ++i;
 	}
 	putchar('\n');
 
-	fclose(ap_BD_productos);
+	fclose(ap_BD_discos);
     }else{
-	printf("Parece que no hay productos registrados\n");
+	printf("Parece que no hay discos registrados\n");
     }
     getchar();
     getchar();
 }
 
-// Contenido de la funciON "nuevoProducto"
-Producto * crearProducto(void){
-    Producto *aux;
+// Contenido de la funciON "nuevoDiscos"
+Disco * crearDisco(void){
+    Disco *aux;
     
-    aux = (Producto *) malloc( sizeof(Producto) );
+    aux = (Disco *) malloc( sizeof(Disco) );
     aux->siguiente = NULL;
     aux->anterior = NULL;
 
-    printf("Ingrese el nombre: \n");
-    scanf("%30s",aux->nombre);
+    printf("Ingrese el nombre del artista: \n");
+    scanf("%60[^\n]",aux->nombre_artista);
     leerLinea();
-    fflush(stdin);
     
-    do{
-	printf("Ingrese la cantidad de ejemplares del producto\n");
-	scanf("%d",&aux->cantidad);
-    }while( aux->cantidad < 0 );
+    printf("Ingrese el titulo del disco: \n");
+    scanf("%100[^\n]",aux->nombre_disco);
+    leerLinea();
 
     do{
-	printf("Ingrese el costo del producto\n");
+	printf("Ingrese el costo del disco: \n");	
 	scanf("%f",&aux->precio);
-	fflush(stdin);
     }while( aux->precio <= 0 );
+
+    do{
+	printf("Ingrese el año de lanzamiento del disco: \n");
+	scanf("%d",&aux->anio_lanzamiento);
+    }while( aux->anio_lanzamiento < 1900 );
+
+    do{
+	printf("Ingrese el número de ejemplares comprados: \n");
+	scanf("%d",&aux->numero_compras);
+    }while( aux->precio < 0 );
+    
     return aux;
 }
 
-// Contenido de la funciON "agregarProducto"
-Booleano agregarProducto( Producto * nvo, ListaProductos *misProductos){
-    Producto *apt = misProductos->primero;
+// Contenido de la funciON "agregarDisco"
+Booleano agregarDisco( Disco * nvo, ListaDiscos *misDiscos ){
+    Disco *apt = misDiscos->primero;
     Booleano existente = falso;
     int i;
     
-    for( i = 1; i <= misProductos->num_productos ; ++i ){
-	if( strcmp( apt->nombre, nvo->nombre ) == 0 ){
+    for( i = 1; i <= misDiscos->num_discos ; ++i ){
+	if( strcmp( apt->nombre_disco, nvo->nombre_disco ) == 0 ){
 	    existente = verdadero;
 	}
 	apt = apt->siguiente;
     }
 
     if( existente ){
-	printf("Lo sentimos, el nombre de producto ya esta ocupado\n");	
+	printf("Lo sentimos, el nombre de disco ya esta ocupado\n");	
 	getchar();
 	return falso;
     }else{
-	if( misProductos->num_productos != 0 ){
-	    misProductos->ultimo->siguiente = nvo;
-	    nvo->anterior = misProductos->ultimo;
-	    misProductos->ultimo = nvo;
+	if( misDiscos->num_discos != 0 ){
+	    misDiscos->ultimo->siguiente = nvo;
+	    nvo->anterior = misDiscos->ultimo;
+	    misDiscos->ultimo = nvo;
 	}else{
-	    misProductos->primero = misProductos->ultimo = nvo;    
+	    misDiscos->primero = misDiscos->ultimo = nvo;    
 	}
 	
-	++misProductos->num_productos;
-	printf("producto añadido correctamente\n");
+	++misDiscos->num_discos;
+	printf("disco añadido correctamente\n");
 	getchar();
 	return verdadero;	
     }
 }
 
-// Contenido de la funciOn "eliminarProducto"
-void eliminarProducto( Usuario *adm, ListaProductos *misProductos ){
+// Contenido de la funciOn "eliminarDiscos"
+void eliminarDisco( Usuario *adm, ListaDiscos *misDiscos ){
     Usuario *usr = (Usuario *) malloc( sizeof(Usuario) );
-    Producto *elim = (Producto *) malloc( sizeof(Producto) );
-    Producto *aux;
+    Disco *elim = (Disco *) malloc( sizeof(Disco) );
+    Disco *aux;
 
     printf("A continuación confirme sus datos de administrador\n");
     leerDatosUsuario( usr->cuenta, usr->contrasena );
@@ -798,42 +818,42 @@ void eliminarProducto( Usuario *adm, ListaProductos *misProductos ){
     }
     else
     {
-	printf("Ahora indique el producto que desea borrar\n");
-	scanf("%30s",elim->nombre);
+	printf("Ahora indique el disco que desea borrar\n");
+	scanf("%100[^\n]",elim->nombre_disco);
 
 	int i;
 	free(usr);
-	aux = misProductos->primero;
-	for( i = 1; i <= misProductos->num_productos; ++i){
-	    if( strcmp( elim->nombre, aux->nombre ) == 0 ){
+	aux = misDiscos->primero;
+	for( i = 1; i <= misDiscos->num_discos; ++i){
+	    if( strcmp( elim->nombre_disco, aux->nombre_disco ) == 0 ){
 		if( 
-		    misProductos->primero != aux &&
-		    misProductos->ultimo != aux
+		    misDiscos->primero != aux &&
+		    misDiscos->ultimo != aux
 		  )
 		{
 		    aux->anterior->siguiente = aux->siguiente;
 		    aux->siguiente->anterior = aux->anterior;
 		}
-		else if( misProductos->num_productos == 0 )
+		else if( misDiscos->num_discos == 0 )
 		{
-		    misProductos->primero = NULL;
-		    misProductos->ultimo = NULL;
+		    misDiscos = NULL;
+		    misDiscos->ultimo = NULL;
 		}
-		else if( misProductos->primero == aux )
+		else if( misDiscos->primero == aux )
 		{
 		    aux->siguiente->anterior = NULL; 
-		    misProductos->primero = misProductos->primero->siguiente;
+		    misDiscos->primero = misDiscos->primero->siguiente;
 		}
 		else // Si es el ultimo
 		{
 		    aux->anterior->siguiente = NULL;
-		    misProductos->ultimo = misProductos->ultimo->anterior;
+		    misDiscos->ultimo = aux->anterior;
 		}
 
 		free(elim);
-		--misProductos->num_productos;
-		escribirBD_Productos( misProductos );
-		printf("Se ha eliminado un producto correctamente\n");
+		--misDiscos->num_discos;
+		escribirBD_Discos( misDiscos );
+		printf("Se ha eliminado un disco correctamente\n");
 		getchar();
 		getchar();
 		return;
