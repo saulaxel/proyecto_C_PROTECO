@@ -220,7 +220,7 @@ int main(void){
     ListaDiscos misDiscos = { NULL, NULL, 0 };
     ListaUsuarios misUsuarios = { NULL, NULL, 0 };
     short condicion = 0;
-    Usuario administrador = { {0}, {0}, {0}, NULL, NULL };
+    Usuario admin = { CTA_ADMIN, CONTRA_ADMIN, "Martínez Ortiz Saúl Axel", NULL, NULL };
     
     system(CLEAR);
     // Recuperar los datos de la base de datos
@@ -385,10 +385,14 @@ void leerBD_Usuarios( ListaUsuarios *misUsuarios ){
 	    printf("%d %s %s\n", i, aux->cuenta, aux->contrasena); 
 	    aux = aux->siguiente;
 	}
-
+	
+	// Se escriben los datos justo despuEs de leerlos para evitar problemas
+	// causados por escribir en el archivo de usuarios directamente, es decir
+	// para evitar:
+	//  - Usuarios mal ordenados
+	//  - Usuarios repetidos
+	//  - etc
 	fclose(ap_BD_usuarios);
-    }else{
-	printf("No hay usuarios guardados\n");
     }
     
     escribirBD_Usuarios( misUsuarios );
@@ -488,7 +492,7 @@ Booleano existeUsuario( Usuario *usr, ListaUsuarios *misUsuarios ){
     int i;
 
     for( i = 1; i <= misUsuarios->num_usuarios ; ++i ){
-	printf("Comparando con el usuario %d\n", i);
+	//printf("Comparando con el usuario %d\n", i);
 	//printf("Las cuentas son: %s %s\n", usr->cuenta, aux->cuenta);
 	//printf("El resultado es: %d\n", strcmp(usr->cuenta, aux->cuenta) );
 	
@@ -497,11 +501,11 @@ Booleano existeUsuario( Usuario *usr, ListaUsuarios *misUsuarios ){
 	//	aux->contrasena);
 	//printf("El resultado es: %d\n", 
     	//	strcmp(usr->contrasena, aux->contrasena) );
-	if( strcmp(usr->contrasena, aux->contrasena) ){
-	    printf("No hay correspondencia\n");
-	}else{
-	    printf("Hay correspondencia\n");    
-	}
+	//if( strcmp(usr->contrasena, aux->contrasena) ){
+	//    printf("No hay correspondencia\n");
+	//}else{
+	//    printf("Hay correspondencia\n");    
+	//}
 
 	if( 
 	    strcmp( aux->cuenta, usr->cuenta ) == 0 &&
@@ -531,20 +535,32 @@ Usuario * crearUsuario( void ){
 // Contenido de la funciOn "agregarUsuario"
 Booleano agregarUsuario( Usuario *nvo, ListaUsuarios *misUsuarios ){
     Usuario *apt = misUsuarios->primero;
-    Booleano existente = falso;
+    Usuario *aux;
     int i;
+    int compara;
     
     for( i = 1; i <= misUsuarios->num_usuarios ; ++i ){
-	if( strcmp( apt->cuenta, nvo->cuenta ) == 0 ){
-	    existente = verdadero;
+	if( // Si se llega a la posiciOn del usuario 
+	    strcmp(nva->cuenta, apt->cuenta) > 0 
+	  )
+	{
+	    aux = apt->siguiente;
+	    if( aux ){
+		nvo->anterior = apt;
+		nvo->siguiente = aux;
+		aux->anterior = nvo;
+	    }else{
+		
+	    }
+
+	}else if( strcmp( apt->cuenta, nvo->cuenta ) == 0 ){
+	    printf("Lo sentimos, el nombre de usuario ya está ocupado\n");
+	    getchar();
+	    return falso;
 	}
 	apt = apt->siguiente;
     }
 
-    if( existente ){
-	printf("Lo sentimos, el nombre de usuario ya esta ocupado\n");	
-	getchar();
-	return falso;
     }else{
 	if( misUsuarios->num_usuarios != 0 ){
 	    misUsuarios->ultimo->siguiente = nvo;
@@ -676,6 +692,13 @@ void leerBD_Discos( ListaDiscos *misDiscos ){
 	printf("No hay discos guardados\n");
     }
 
+	
+    // Se escriben los datos justo despuEs de leerlos para evitar problemas
+    // causados por escribir en el archivo de discos directamente, es decir
+    // para evitar:
+    //  - Discos mal ordenados
+    //  - Discos repetidos
+    //	- Etc
     escribirBD_Discos( misDiscos );
     getchar();
 }
