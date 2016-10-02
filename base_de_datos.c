@@ -1,7 +1,13 @@
 /**
- * MartInez Ortiz SaUl Axel
- * PROTECO generaciOn 33, curso de Bases de Datos
- * Tarea n: RealizaciOn de una base de datos sencilla en c
+ * Universidad Nacional Autonoma de MExico
+ * IngenierIa en computaciOn
+ * Ingeniero MartInez Ortiz SaUl Axel
+ * Base de datos de tienda
+ * PROTECO, generación 33
+ * Fecha: 30/09/16
+ * DescripciOn: Sistema para el manejo de las bases de datos de
+ *  una tienda de discos compactos ya sea por el administrador
+ *  o por los vendedores.
  **/
 
 // InclusiOn de informaciOn requerida
@@ -29,20 +35,22 @@ enum booleano { falso, verdadero };
 typedef enum booleano Booleano;
 
 // Estructura para los usuarios
-#define CTA_ADMIN "admin"
+#define NOM_ADMIN "admin"
 #define CONTRA_ADMIN "admin"
 #define LONGITUD_CUENTA 30
 #define LONGITUD_CONTRASENA 16
-#define MAX_USUARIOS 5
+#define MAX_USUARIOS 100
 struct usuario{
 	unsigned char cuenta[LONGITUD_CUENTA+1];
 	unsigned char contrasena[LONGITUD_CONTRASENA+1];
 	unsigned char nombre_usuario[LONG_NOMBRE_PERSONA+1];
+	int edad;
+	int numero_compras;
 	struct usuario *siguiente;
 	struct usuario *anterior;
 };
 typedef struct usuario Usuario;
-
+Usuario admin = {NOM_ADMIN,CONTRA_ADMIN,"Martínez Ortiz Saúl Axel",20,0,NULL,NULL};
 struct listaUsuarios{
 	Usuario *primero;
 	Usuario *ultimo;
@@ -74,20 +82,20 @@ typedef struct listaDiscos ListaDiscos;
 // Prototipos de funciOn
 
 /**
- * FunciOn menu: vacio -> vacio
+ * FunciOn menu: apuntador a estructura Usuario -> vacio
  * DescripciOn: Desglosa las opciones para que el 
  *  usuario sepa de donde elejir
  **/
-void menu( void );
+void menu( Usuario *usr );
 
 /**
- * FunciOn establecerUsuariosIniciales: apuntador a cadena,
+ * FunciOn establecerUsuario: apuntador a cadena,
 				        apuntador a estructura ListaUsuarios -> vacio
  * DescripciOn: Manda a llamar a la funciOn que lee los usuarios de la 
  * base de datos. En caso de no haber base de datos este la crea
  * con los datos de administrador.
  **/
-void establecerUsuariosIniciales( Usuario *usr, ListaUsuarios *misUsuarios );
+Usuario * establecerUsuario( ListaUsuarios *misUsuarios );
 
 /**
  * FunciOn leerBD_Usuarios: apuntador a estructura ListaUsuarios -> vacio
@@ -110,6 +118,25 @@ void escribirBD_Usuarios( ListaUsuarios *misUsuarios );
  **/
 void mostrarUsuarios( void );
 
+/**
+ * FunciOn mostrarUsuariosInversa: apuntador a estructura ListaUsuarios -> vacio
+ * Descripción: Imprime a pantalla los datos de los usuarios en orden
+ *  inverso al alfabEtico
+ */
+void mostrarUsuariosInversa( ListaUsuarios *misUsuarios );
+
+/**
+ * FunciOn verPerfil: apuntador a estructura Usuario -> vacio
+ * DescripciOn: Despliega los datos del usuario actual
+ */
+void verPerfil( Usuario *usr );
+
+/**
+ * FunciOn modificarInfo: apuntador a estructura Usuario -> vacio
+ * DescripciOn: Permite al usuario cambiar alguno de sus datos
+ */
+void modificarInfo( Usuario *usr );
+    
 /**
  * FunciOn cambiarUsuario: estructura Usuario, estructura ListaUsuarios -> vacio
  * DescripciOn: Permite al usuario intentar cambiarse a otro
@@ -184,6 +211,33 @@ void escribirBD_Discos( ListaDiscos *misDiscos );
 void mostrarDiscos( void );
 
 /**
+ * FunciOn mostrarDiscosInversa: apuntador a estructura ListaUsuarios -> vacio
+ * DescripciOn: Imprime en pantalla los discos en orden
+ *  inverso al alfabetico.
+ */
+void mostrarDiscosInversa( ListaDiscos *misDiscos );
+
+/**
+ * FunciOn buscarDisco: apuntador a estructura ListaUsuarios -> vacio
+ * DescripciOn: Imprime los datos de un disco buscado por 
+ *  medio de su nombre.
+ */
+void buscarDisco( ListaDiscos *misDiscos );
+
+/**
+ * FunciOn comprarDisco: apuntador a usuarios,
+ *  apuntador a estructura ListaUsuarios -> vacio
+ * DescripciOn: Permite al usuario comprar un disco
+ */
+void comprarDisco( Usuario *usr, ListaDiscos *misDiscos);
+
+/**
+ * FunciOn editarDisco: apuntador a estructura ListaDiscos, vacio
+ * DescripciON: Permite al usuario modificar un dato de un disco
+ */
+void editarDisco( ListaDiscos *misDiscos );
+
+/**
  * FunciOn crearDisco: vacio -> apuntador a Disco
  * DescripciOn: Se encarga de instanciar un nuevo disco por 
  *  medio de memoria dinAmica e inicializado con datos pedidos
@@ -219,8 +273,8 @@ void leerLinea( void );
 int main(void){
     ListaDiscos misDiscos = { NULL, NULL, 0 };
     ListaUsuarios misUsuarios = { NULL, NULL, 0 };
-    short condicion = 0;
-    Usuario admin = { CTA_ADMIN, CONTRA_ADMIN, "Martínez Ortiz Saúl Axel", NULL, NULL };
+    short opcion = 0;
+    Usuario *usr;
     
     system(CLEAR);
     // Recuperar los datos de la base de datos
@@ -230,85 +284,125 @@ int main(void){
     printf("\tLas bases de datos se han leido correctamente\n\n");
     // Si la base de datos de usuarios esta vacia --> La aplicacion no
     // ha sido usada
-    establecerUsuariosIniciales( &administrador, &misUsuarios );
+    usr = establecerUsuario( &misUsuarios );
 
     do{
 	system(CLEAR);
-	printf("Usuario: %s \n\n", administrador.cuenta);
-
+	printf("Usuario: %s \n\n", usr->cuenta);
+	short opcion_maxima;
+	if( strcmp(usr->cuenta, admin.cuenta) == 0 ){
+	    opcion_maxima = 16;
+	}else{
+	    opcion_maxima = 7;		    
+	}
 	printf("Ingrese la opción deseada\n");	
-	menu();
-	scanf("%hd",&condicion);
-
-	switch( condicion ){
+	menu( usr );
+	do{
+	    printf("> ");
+	    scanf("%hd",&opcion);
+	    leerLinea();
+	}while( opcion < 1 || opcion > opcion_maxima );
+	
+	if( opcion == opcion_maxima ){
+	    opcion = 16;    
+	}
+	switch( opcion ){
 	    case 1:
-		mostrarUsuarios();
+	    mostrarDiscos();
 	    break;
 
 	    case 2:
-		mostrarDiscos();
+	    buscarDisco( &misDiscos );
 	    break;
 
 	    case 3:
-		if( misUsuarios.num_usuarios < MAX_USUARIOS ){
-		    if( agregarUsuario( crearUsuario(), &misUsuarios ) ){
-			printf("Hay un total de %d usuario(s)\n",
-				misUsuarios.num_usuarios);
-			 
-			escribirBD_Usuarios( &misUsuarios );
-		    }
-		}else{
-		    printf("Lo sentimos, se ha alcanzado el máximo número\n");
-		    printf("de usuarios\n");
-		    getchar();
-		}
-		getchar();
+	    comprarDisco( usr, &misDiscos );
 	    break;
 
 	    case 4:
-		if( misUsuarios.num_usuarios >= 1 ){
-		    eliminarUsuario( &administrador, &misUsuarios );
-		}
+	    verPerfil( usr );
 	    break;
 
 	    case 5:
-		if( misDiscos.num_discos < MAX_DISCOS ){
-		    if( agregarDisco( crearDisco(), &misDiscos ) ){
-			printf("Hay un total de %d disco(s)\n",
-				misDiscos.num_discos);
-			escribirBD_Discos( &misDiscos );
-			}
-		}else{
-			printf("Lo sentimos, se ha alcanzado el máximo número\n");
-			printf("de discos\n");
-			getchar();
-		}
-		getchar();
+	    modificarInfo( usr );
+	    escribirBD_Usuarios( &misUsuarios );
 	    break;
 
 	    case 6:
-		if( misDiscos.num_discos >= 1 ){
-		    eliminarDisco( &administrador, &misDiscos );
-		}
+	    cambiarUsuario( usr, &misUsuarios );
 	    break;
-	    
+
 	    case 7:
-		cambiarUsuario( &administrador, &misUsuarios );
+	    mostrarUsuarios();
 	    break;
 
 	    case 8:
-		printf("Esperamos volver a verlo pronto\n");
-		leerLinea();
-		getchar();
+	    mostrarUsuariosInversa( &misUsuarios );
 	    break;
 
-	    default:
-		printf("Error, opción no valida\n");
-		leerLinea();
-		getchar();
+	    case 9:
+	    mostrarDiscos();
 	    break;
+
+	    case 10:
+	    mostrarDiscosInversa( &misDiscos );
+	    break;
+
+	    case 11:
+	    if( misUsuarios.num_usuarios < MAX_USUARIOS ){
+		if( agregarUsuario( crearUsuario(), &misUsuarios ) ){
+		    printf("Hay un total de %d usuario(s)\n",
+			    misUsuarios.num_usuarios);
+		    escribirBD_Usuarios( &misUsuarios );
+		}
+	    }else{
+		printf("Lo sentimos, se ha alcanzado el máximo número\n");
+		printf("de usuarios\n");
+		getchar();
+	    }
+	    getchar();
+	    break;
+
+	    case 12:
+	    if( misUsuarios.num_usuarios >= 1 ){
+		eliminarUsuario( usr, &misUsuarios );
+	    }
+	    break;
+
+	    case 13:
+	    if( misDiscos.num_discos < MAX_DISCOS ){
+		if( agregarDisco( crearDisco(), &misDiscos ) ){
+		    printf("Hay un total de %d disco(s)\n",
+			    misDiscos.num_discos);
+		    escribirBD_Discos( &misDiscos );
+		    }
+	    }else{
+		    printf("Lo sentimos, se ha alcanzado el máximo número\n");
+		    printf("de discos\n");
+		    getchar();
+	    }
+	    getchar();
+	    break;
+
+	    case 14:
+		if( misDiscos.num_discos >= 1 ){
+		    eliminarDisco( usr, &misDiscos );
+		}
+	    break;
+
+	    case 15:
+	    editarDisco( &misDiscos );
+	    break;
+
+	    case 16:
+	    printf("Esperamos volver a verl@ pronto\n");
+	    leerLinea();
+	    escribirBD_Usuarios( &misUsuarios );
+	    escribirBD_Discos( &misDiscos );
+	    getchar();
+	    ;
 	}
-    }while ( condicion != 8 );
+    }while ( opcion != 16 );
 
 
     getchar();
@@ -316,45 +410,82 @@ int main(void){
 }
 
 // Contenido de la funciOn "menu"
-void menu(){
-    printf("\t 1) Mostrar usuarios guardados\n");
-    printf("\t 2) Mostrar discos guardados\n");
-    printf("\t 3) Agregar usuario\n");
-    printf("\t 4) Eliminar usuario\n");
-    printf("\t 5) Agregar discos\n");
-    printf("\t 6) Eliminar disco\n");
-    printf("\t 7) Cambiar de usuario\n");
-    printf("\t 8) Salir\n");
+void menu( Usuario *usr ){
+    printf("\t 1) Mostrar discos\n");
+    printf("\t 2) Buscar disco\n");
+    printf("\t 3) Comprar disco\n");
+    printf("\t 4) Ver perfil de usuario\n");
+    printf("\t 5) Modificar info\n");
+    printf("\t 6) Cambiar de usuario\n");
+    if( strcmp(usr->cuenta, admin.cuenta) == 0 ){
+    printf("\t 7) Mostrar usuarios ordenados\n");
+    printf("\t 8) Mostrar usuarios a la inversa\n");
+    printf("\t 9) Mostrar discos ordenados\n");
+    printf("\t 10) Mostrar discos a la inversa\n");
+    printf("\t 11) Agregar usuario\n");
+    printf("\t 12) Eliminar usuario\n");
+    printf("\t 13) Agregar discos\n");
+    printf("\t 14) Eliminar disco\n");
+    printf("\t 15) Editar disco\n");
+    printf("\t 16) Salir\n");
+    }else{
+    printf("\t 7) Salír\n");
+    }
 }
 
-// Contenido de la funciOn "establecerUsuariosIniciales"
-void establecerUsuariosIniciales( Usuario *usr, ListaUsuarios *misUsuarios ){
+// Contenido de la funciOn "establecerUsuario"
+Usuario * establecerUsuario( ListaUsuarios *misUsuarios ){
+    Usuario *usr;
+    Booleano datosCorrectos = falso;
+    int opcion;
+    unsigned char cuenta[60], contrasena[60];
 
-    if( misUsuarios->num_usuarios == 0 ){
-	printf("Usted será el primer usuario\n");
-    }
     
-    leerDatosUsuario( usr->cuenta, usr->contrasena);
+    while(!datosCorrectos){
+	opcion = -1;
+	printf("Seleccione una opción:\n");
+	printf("\t1. Ingresar con una cuenta existente.\n");
+	printf("\t2. Salir.\n");
 
-    if( misUsuarios->num_usuarios == 0){
-	if( agregarUsuario( usr, misUsuarios ) ){
-	    escribirBD_Usuarios( misUsuarios );	
-	    printf("Felicidades %s, ahora puedes administrar una\n",usr->cuenta);
-	    printf("base de datos\n");
-	    getchar();
+	while(opcion < 1 || opcion > 2){
+	    printf("> ");
+	    scanf("%d", &opcion);
+	    leerLinea();
 	}
-    }else{
-	if( existeUsuario( usr, misUsuarios ) == falso ){
 
-	    printf("Lo sentimos, el nombre de usuario o contraseña\n");
-	    printf("no son validos, pida al administrador que le de\n");
-	    printf("acceso\n");
-
+	if(opcion == 1){
+	    printf("Ingrese sus datos de usuario:\n");
+	    leerDatosUsuario(cuenta, contrasena);
+	    usr = (Usuario *) malloc( sizeof(Usuario) );
+	    strcpy(usr->cuenta, cuenta);
+	    strcpy(usr->contrasena, contrasena);
+	    if(existeUsuario(usr, misUsuarios)){
+		datosCorrectos = verdadero;
+		free(usr);
+		Booleano a = falso;
+		usr = misUsuarios->primero;
+		int i;
+		for(i=1; i<=misUsuarios->num_usuarios && !a; ++i){
+		    if( strcmp( cuenta, usr->cuenta) == 0 ){
+			a = verdadero;
+		    }else{
+			usr = usr->siguiente;
+		    }  
+		}
+		printf("Bienvenid@ %s\n",usr->cuenta);
+	    }else{
+		printf("Cuenta o contraseña incorrectas\n");
+	    } 
+	}else{
+	    printf("Vuelva pronto\n");
 	    getchar();
 	    exit(0);
-
 	}
-    }	
+    }
+    getchar();
+    getchar();
+    return usr;
+
 }
 
 // Contenido de la funciOn "leerBD_Usuarios"
@@ -364,77 +495,169 @@ void leerBD_Usuarios( ListaUsuarios *misUsuarios ){
 
     printf("Leyendo la base de datos de usuarios...\n");
     getchar();
-
     if( ap_BD_usuarios ){
 
 	while( !feof(ap_BD_usuarios) ){
 	    nvo = (Usuario*) malloc( sizeof(Usuario) );
-	    fscanf(ap_BD_usuarios,"%30[^\t]\t",nvo->cuenta);
-	    fscanf(ap_BD_usuarios,"%16[^\t]\n",nvo->contrasena);
-	    printf("Se ha leido un usuario\n");
-	    printf("Sus datos son %s %s\n",nvo->cuenta,nvo->contrasena);
+	    fscanf(ap_BD_usuarios,"%[^\t]\t",nvo->cuenta);
+	    fscanf(ap_BD_usuarios,"%[^\t]\t",nvo->contrasena);
+	    fscanf(ap_BD_usuarios,"%[^\t]\t",nvo->nombre_usuario);
+	    fscanf(ap_BD_usuarios,"%d\t",&(nvo->edad));
+	    fscanf(ap_BD_usuarios,"%d\t\n",&(nvo->numero_compras));
+	    //printf("Se ha leido un usuario\n");
+	    //printf("Sus datos son %s %s\n",nvo->cuenta,nvo->contrasena);
 	    agregarUsuario( nvo, misUsuarios );
 	}
 
-	printf("La base de datos se  de usuarios ha leido completamente\n");
-	printf("Sus datos son\n");
+	//printf("La base de datos se  de usuarios ha leido completamente\n");
+	//printf("Sus datos son\n");
 
-	int i;
-	Usuario *aux = misUsuarios->primero;
-	for( i = 1; i <= misUsuarios->num_usuarios; ++i ){
-	    printf("%d %s %s\n", i, aux->cuenta, aux->contrasena); 
-	    aux = aux->siguiente;
-	}
+	//int i;
+	//Usuario *aux = misUsuarios->primero;
+	//for( i = 1; i <= misUsuarios->num_usuarios; ++i ){
+	    //printf("%d %s %s\n", i, aux->cuenta, aux->contrasena); 
+	    //aux = aux->siguiente;
+	//}
 	
-	// Se escriben los datos justo despuEs de leerlos para evitar problemas
-	// causados por escribir en el archivo de usuarios directamente, es decir
-	// para evitar:
-	//  - Usuarios mal ordenados
-	//  - Usuarios repetidos
-	//  - etc
 	fclose(ap_BD_usuarios);
+    }else{
+	agregarUsuario(&admin,misUsuarios);
     }
     
+    // Se escriben los datos justo despuEs de leerlos para evitar problemas
+    // causados por escribir en el archivo de usuarios directamente, es decir
+    // para evitar:
+    //  - Usuarios mal ordenados
+    //  - Usuarios repetidos
+    //  - etc
     escribirBD_Usuarios( misUsuarios );
-    getchar();
 }
 
 // Contenido de la funciON "escribirBD_Usuarios"
 void escribirBD_Usuarios( ListaUsuarios *misUsuarios ){
-    FILE *ap_BD_usuarios = fopen(ARCHIVO_USUARIOS,"w");
+    FILE *ap_BD_usuarios;
     Usuario *aux = misUsuarios->primero;
     int i;
-
-    for( i = 1; i <= misUsuarios->num_usuarios; ++i){
-	fprintf(ap_BD_usuarios,"%s\t%s\t\n",aux->cuenta,aux->contrasena);
-	aux = aux->siguiente;
-    }
+    if(aux != NULL){
+	ap_BD_usuarios = fopen(ARCHIVO_USUARIOS,"w");
+	for( i = 1; i <= misUsuarios->num_usuarios; ++i){
+	    fprintf(ap_BD_usuarios,"%s\t%s\t%s\t%d\t%d\t\n",
+	    aux->cuenta,aux->contrasena,s
+	    aux->nombre_usuario,
+	    aux->edad, aux->numero_compras
+	   );
+	    aux = aux->siguiente;
+	}
     
-    fclose(ap_BD_usuarios);
+	fclose(ap_BD_usuarios);
+    }
 }
 
 // Contenido de la funciOn "mostrarUsuarios"
 void mostrarUsuarios( void ){
     FILE *ap_BD_usuarios = fopen(ARCHIVO_USUARIOS,"r");
     unsigned char cadena[LONGITUD_CUENTA+1];
+    int entero;
     int i = 1;
 
     if( ap_BD_usuarios ){
 	
 	while( !feof(ap_BD_usuarios) ){
 	    printf("%2d",i);
-	    fscanf(ap_BD_usuarios,"%30[^\t]\t",cadena);
-	    printf("\t%30s",cadena);
-	    fscanf(ap_BD_usuarios,"%16[^\t]\n",cadena);
-	    printf("\t%16s\n",cadena);
+	    fscanf(ap_BD_usuarios,"%[^\t]\t",cadena);
+	    printf("\tUsuario: %s\n",cadena);
+	    fscanf(ap_BD_usuarios,"%[^\t]\t",cadena);
+	    printf("\tContraseña: %s\n",cadena);
+	    fscanf(ap_BD_usuarios,"%[^\t]\t",cadena);
+	    printf("\tNombre de usuario: %s\n",cadena);
+	    fscanf(ap_BD_usuarios,"%d\t",&entero);
+	    printf("\tEdad: %d\n",entero);
+	    fscanf(ap_BD_usuarios,"%d\t\n",&entero);
+	    printf("\tDiscos comprados: %d\t\n",entero);
 	    ++i;
 	}
-	putchar('\n');
 
 	fclose(ap_BD_usuarios);
     }else{
 	printf("Parece que no hay usuarios registrados\n");
     }
+    getchar();
+    getchar();
+}
+
+// Contenido de la funciON "mostrarUsuariosInversa"
+void mostrarUsuariosInversa( ListaUsuarios *misUsuarios ){
+    Usuario *apt;
+    int i,j;
+    j = misUsuarios->num_usuarios;
+    apt = misUsuarios->ultimo;
+    if( apt ){
+	for(i = j; i >= 1; --i){
+	    printf("%2d",j - i + 1);
+	    printf("\tUsuario: %s\n",apt->cuenta);
+	    printf("\tContraseña: %s\n",apt->contrasena);
+	    printf("\tNombre de usuario: %s\n",apt->nombre_usuario);
+	    printf("\tEdad: %d\n",apt->edad);
+	    printf("\tDiscos comprados: %d\t\n",apt->numero_compras);
+	    apt = apt->anterior;
+	}
+    }else{
+	printf("Parece que no hay usuarios registrados\n"); 
+    }
+    getchar();
+    getchar();
+}
+
+// Contenido de la funciOn "verPerfil"
+void verPerfil( Usuario *usr ){
+    printf("\tUsuario: %s\n",usr->cuenta);
+    printf("\tContraseña: %s\n",usr->contrasena);
+    printf("\tNombre de usuario: %s\n",usr->nombre_usuario);
+    printf("\tEdad: %d\n",usr->edad);
+    printf("\tDiscos comprados: %d\t\n",usr->numero_compras);
+    getchar();
+    getchar();
+}
+
+// Contenido de la funciOn "modificarInfo"
+void modificarInfo( Usuario *usr ){
+    short opcion;
+    if( strcmp( usr->cuenta, admin.cuenta) ==0 ){
+	printf("No puedes modificar los datos del administrador\n");
+	getchar();
+	return;
+    }
+    
+    printf("Elija la información que desea modificar\n");
+    printf("\t1) Contraseña\n");
+    printf("\t2) Nombre\n");
+    printf("\t3) Edad\n");
+
+    do{
+	scanf("%hd",&opcion);
+	leerLinea();
+    }while( opcion < 1 || opcion > 3 );
+    getchar();
+
+    if( opcion == 1 ){
+	printf("Ingrese su nueva contraseña\n");
+	printf("> ");
+	scanf("%s",usr->contrasena);
+	leerLinea();
+    }else if( opcion == 2 ){
+	printf("Ingrese su nuevo nombre\n");
+	printf("> ");
+	scanf("%[^\n]",usr->nombre_usuario);
+    }else{
+	printf("Ingrese su nueva edad\n");	
+	do{
+	    printf("> ");
+	    scanf("%d",&(usr->edad) );  
+	    leerLinea();
+	}while( usr->edad < 0 || usr->edad > 200 );
+    }
+
+    printf("Cambios realizados satisfactoriamente2\n");
     getchar();
     getchar();
 }
@@ -447,18 +670,19 @@ void cambiarUsuario( Usuario *usr, ListaUsuarios *misUsuarios ){
     int i;
 
     leerDatosUsuario(nuevoUsuario->cuenta,nuevoUsuario->contrasena);
-
-    for( i = 1; i <= misUsuarios->num_usuarios; ++i){
-	if( 
-	    nuevoUsuario->cuenta == aux->cuenta == 0 &&
-	    nuevoUsuario->contrasena == aux->contrasena == 0
-	  )
-	{
-	    strcpy(usr->cuenta,nuevoUsuario->cuenta);
-	    strcpy(usr->contrasena,nuevoUsuario->contrasena);
-	    cambio = verdadero;
+    if( strcmp(nuevoUsuario->cuenta, usr->cuenta) != 0 ){
+	for( i = 1; i <= misUsuarios->num_usuarios; ++i){
+	    if( 
+		strcmp(nuevoUsuario->cuenta, aux->cuenta) == 0 &&
+		strcmp(nuevoUsuario->contrasena, aux->contrasena) == 0
+	      )
+	    {
+		strcpy(usr->cuenta,nuevoUsuario->cuenta);
+		strcpy(usr->contrasena,nuevoUsuario->contrasena);
+		cambio = verdadero;
+	    }
+	    aux = aux->siguiente;
 	}
-	aux = aux->siguiente;
     }
 
     if(cambio){
@@ -526,55 +750,77 @@ Usuario * crearUsuario( void ){
     aux = (Usuario *) malloc( sizeof(Usuario) );
     aux->siguiente = NULL;
     aux->anterior = NULL;
+    aux->numero_compras = 0;
 
     leerDatosUsuario( aux->cuenta, aux->contrasena );
+    getchar();
+    printf("Ingrese el nombre completo del usuario:\n");
+    scanf("%[^\n]",aux->nombre_usuario);
+    getchar();
+
+    do{
+	printf("Ingrese la edad del usuario: \n");	
+	scanf("%d",&aux->edad);
+	//printf("%d\n",aux->edad);
+	leerLinea();
+    }while( aux->edad <= 0 );
 
     return aux;
 }
 
 // Contenido de la funciOn "agregarUsuario"
 Booleano agregarUsuario( Usuario *nvo, ListaUsuarios *misUsuarios ){
-    Usuario *apt = misUsuarios->primero;
+    Usuario *apt;
     Usuario *aux;
+    Booleano a = falso; // Bandera para remediar la estupidez humana
     int i;
-    int compara;
-    
-    for( i = 1; i <= misUsuarios->num_usuarios ; ++i ){
-	if( // Si se llega a la posiciOn del usuario 
-	    strcmp(nva->cuenta, apt->cuenta) > 0 
-	  )
-	{
-	    aux = apt->siguiente;
-	    if( aux ){
-		nvo->anterior = apt;
-		nvo->siguiente = aux;
-		aux->anterior = nvo;
-	    }else{
-		
-	    }
-
-	}else if( strcmp( apt->cuenta, nvo->cuenta ) == 0 ){
-	    printf("Lo sentimos, el nombre de usuario ya está ocupado\n");
-	    getchar();
-	    return falso;
-	}
-	apt = apt->siguiente;
-    }
-
-    }else{
-	if( misUsuarios->num_usuarios != 0 ){
-	    misUsuarios->ultimo->siguiente = nvo;
-	    nvo->anterior = misUsuarios->ultimo;
-	    misUsuarios->ultimo = nvo;
-	}else{
-	    misUsuarios->primero = misUsuarios->ultimo = nvo;    
-	}
-	
+    apt = misUsuarios->primero; 
+    if( apt == NULL ){
+	misUsuarios->primero = nvo;
+	misUsuarios->ultimo = nvo;
 	++misUsuarios->num_usuarios;
-	printf("Usuario añadido correctamente\n");
-	getchar();
-	return verdadero;	
+	return verdadero;
     }
+    // Primer caso, si el nuevo usuario va acomodado en la primera
+    //  posición
+    if( strcmp(nvo->cuenta, apt->cuenta) < 0 ){
+	nvo->siguiente = apt;
+	apt->anterior = nvo;
+	misUsuarios->primero = nvo;
+    }else{
+	// Segundo caso, se recorren posiciones hasta encontrar el
+	//  lugar que le corresponde al usuario
+	for(i = 1; i <= misUsuarios->num_usuarios && !a; ++i){
+	    //Si se llega a la posiciOn del usuario
+
+	    if( 
+		strcmp(nvo->cuenta, apt->cuenta) > 0 && 
+		apt->siguiente == NULL || ( apt->siguiente != NULL &&
+		strcmp(nvo->cuenta, apt->siguiente->cuenta) < 0)
+	      )
+	    {
+		aux = apt->siguiente;	
+		nvo->anterior = apt;
+		apt->siguiente = nvo;
+		if(aux){
+		    nvo->siguiente = aux;
+		    aux->anterior = nvo;
+		}else{
+		    misUsuarios->ultimo = nvo;
+		}
+		a = verdadero;
+	    }else if(strcmp(apt->cuenta, nvo->cuenta) == 0 ){
+		printf("Lo sentimos, el nombre de usuario ya está ocupado\n");
+		getchar();
+		return falso;
+	    }
+	    apt = apt->siguiente;
+	}
+    }
+    ++misUsuarios->num_usuarios;
+    printf("Usuario añadido correctamente\n");
+    getchar();
+    return verdadero;	
 }
 
 // Contenido de la funciOn "eliminarUsuario"
@@ -582,79 +828,59 @@ void eliminarUsuario( Usuario *adm, ListaUsuarios *misUsuarios ){
     Usuario *aux = (Usuario *) malloc( sizeof(Usuario) );
     Usuario *elim = (Usuario *) malloc( sizeof(Usuario) );
 
-    printf("A continuación confirme sus datos de administrador\n");
-    printf("(igualmente no le basta con una su cuenta para borrar\n");
-    printf("a un usuario, también requerirá la contraseña del\n");
-    printf("usuario a borrar\n");
-    leerDatosUsuario( aux->cuenta, aux->contrasena );
-
+    printf("Indique el usuario que desea borrar\n");
+    leerDatosUsuario( elim->cuenta, elim->contrasena );
     if( 
-	strcmp(adm->cuenta,aux->cuenta) != 0 || 
-	strcmp(adm->contrasena,aux->contrasena) != 0
+	strcmp( elim->cuenta, adm->cuenta ) == 0 &&
+	strcmp( elim->contrasena, adm->contrasena ) == 0
       )
     {
-	free(aux);
-	printf("Cuenta o contraseña incorrectas\n");
+	printf("No te puedes eliminar a ti mismo\n");
 	getchar();
 	getchar();
+	return;
     }
-    else
-    {
-	printf("Ahora indique el usuario que desea borrar\n");
-	leerDatosUsuario( elim->cuenta, elim->contrasena );
+
+    int i;
+    free(aux);
+    aux = misUsuarios->primero;
+    for( i = 1; i <= misUsuarios->num_usuarios; ++i){
 	if( 
-	    strcmp( elim->cuenta, adm->cuenta ) == 0 &&
-	    strcmp( elim->contrasena, adm->contrasena ) == 0
+	    strcmp( elim->cuenta, aux->cuenta ) == 0 &&
+	    strcmp( elim->contrasena, aux->contrasena ) == 0
 	  )
 	{
-	    printf("No te puedes eliminar a ti mismo\n");
+	    if( 
+		misUsuarios->primero != aux &&
+		misUsuarios->ultimo != aux
+	      )
+	    {
+		aux->anterior->siguiente = aux->siguiente;
+		aux->siguiente->anterior = aux->anterior;
+	    }
+	    else if( misUsuarios->primero == aux )
+	    {
+		aux->siguiente->anterior = NULL; 
+		misUsuarios->primero = misUsuarios->primero->siguiente;
+	    }
+	    else // Si es el ultimo
+	    {
+		aux->anterior->siguiente = NULL;
+		misUsuarios->ultimo = misUsuarios->ultimo->anterior;
+	    }
+
+	    free(elim);
+	    --misUsuarios->num_usuarios;
+	    escribirBD_Usuarios( misUsuarios );
+	    printf("Se ha eliminado un usuario correctamente\n");
 	    getchar();
 	    getchar();
 	    return;
-	}
-
-	int i;
-	free(aux);
-	aux = misUsuarios->primero;
-	for( i = 1; i <= misUsuarios->num_usuarios; ++i){
-	    printf("hola %d ",i);
-	    if( 
-		strcmp( elim->cuenta, aux->cuenta ) == 0 &&
-		strcmp( elim->contrasena, aux->contrasena ) == 0
-	      )
-	    {
-		if( 
-		    misUsuarios->primero != aux &&
-		    misUsuarios->ultimo != aux
-		  )
-		{
-		    aux->anterior->siguiente = aux->siguiente;
-		    aux->siguiente->anterior = aux->anterior;
-		}
-		else if( misUsuarios->primero == aux )
-		{
-		    aux->siguiente->anterior = NULL; 
-		    misUsuarios->primero = misUsuarios->primero->siguiente;
-		}
-		else // Si es el ultimo
-		{
-		    aux->anterior->siguiente = NULL;
-		    misUsuarios->ultimo = misUsuarios->ultimo->anterior;
-		}
-
-		free(elim);
-		--misUsuarios->num_usuarios;
-		escribirBD_Usuarios( misUsuarios );
-		printf("Se ha eliminado un usuario correctamente\n");
-		getchar();
-		getchar();
-		return;
-	    } 
-	    aux = aux->siguiente;
-	}
-	getchar();
-	getchar();
+	} 
+	aux = aux->siguiente;
     }
+    getchar();
+    getchar();
 }
 
 // Contenido de la funciOn "leerBD_Discos"
@@ -669,24 +895,24 @@ void leerBD_Discos( ListaDiscos *misDiscos ){
 
         while( !feof(ap_BD_discos) ){
             nvo = (Disco*) malloc( sizeof(Disco) );
-            fscanf(ap_BD_discos,"%60[^\t]\t",nvo->nombre_artista);
-	    fscanf(ap_BD_discos,"%100[^\t]\t",nvo->nombre_disco);
+            fscanf(ap_BD_discos,"%[^\t]\t",nvo->nombre_artista);
+	    fscanf(ap_BD_discos,"%[^\t]\t",nvo->nombre_disco);
 	    fscanf(ap_BD_discos,"%f\t",&nvo->precio);
 	    fscanf(ap_BD_discos,"%d\t",&nvo->anio_lanzamiento);
 	    fscanf(ap_BD_discos,"%d\t\n",&nvo->numero_compras);
 
-            printf("Se ha leido un discos\n");
-	    printf(
-		    "Sus datos son:\n%s\n%s\n%.2f %d %d\n",
-		    nvo->nombre_artista,nvo->nombre_disco,
-		    nvo->precio, nvo->anio_lanzamiento,
-		    nvo->numero_compras
-		  );
+            //printf("Se ha leido un discos\n");
+	    //printf(
+		    //"Sus datos son:\n%s\n%s\n%.2f %d %d\n",
+		    //nvo->nombre_artista,nvo->nombre_disco,
+		    //nvo->precio, nvo->anio_lanzamiento,
+		    //nvo->numero_compras
+		  //);
 	    agregarDisco( nvo, misDiscos );
 	}
 
-	printf("La base de datos de discos se ha leido completamente\n");
-	printf("Sus datos son\n");
+	//printf("La base de datos de discos se ha leido completamente\n");
+	//printf("Sus datos son\n");
 
     }else{
 	printf("No hay discos guardados\n");
@@ -705,21 +931,36 @@ void leerBD_Discos( ListaDiscos *misDiscos ){
 
 // Contenido de la funciOn "escribirBD_Discos"
 void escribirBD_Discos( ListaDiscos *misDiscos ){
-    FILE *ap_BD_discos = fopen(ARCHIVO_DISCOS,"w");
+    FILE *ap_BD_discos;
     Disco *aux = misDiscos->primero;
     int i;
-
-    for( i = 1; i <= misDiscos->num_discos; ++i){
-	fprintf( 
-		 ap_BD_discos,"%s\t%s\t%.2f\t%2d\t%d\t\n",
-		 aux->nombre_artista,aux->nombre_disco,
-		 aux->precio,aux->anio_lanzamiento,
-		 aux->numero_compras
-	       );
-	aux = aux->siguiente;
-    }
+    //printf("Escribiendo discos\n");
+    //aux = misDiscos->primero;
+    //for(i=1;i<=misDiscos->num_discos;++i){
+	//printf("%d %s %s %f %d %d\n",
+	    //i, aux->nombre_artista,
+	    //aux->nombre_disco,
+	    //aux->precio,
+	    //aux->anio_lanzamiento,
+	    //aux->numero_compras
+	//);
+	//aux = aux->siguiente;	
+    //}
+    //aux = misDiscos->primero;
+    if(aux){
+	ap_BD_discos = fopen(ARCHIVO_DISCOS,"w");
+	for( i = 1; i <= misDiscos->num_discos; ++i){
+	    fprintf( 
+		    ap_BD_discos,"%s\t%s\t%f\t%d\t%d\t\n",
+		    aux->nombre_artista, aux->nombre_disco,
+		    aux->precio, aux->anio_lanzamiento,
+		    aux->numero_compras
+		   );
+	    aux = aux->siguiente;
+	}
     
-    fclose(ap_BD_discos);
+	fclose(ap_BD_discos);
+    }
 }
 
 // Contenido de la funciOn "mostrarDiscos"
@@ -735,12 +976,16 @@ void mostrarDiscos( void ){
 	
 	while( !feof(ap_BD_discos) ){
 	    printf("%2d",i);
-	    fscanf(ap_BD_discos,"%30[^\t]\n",cadena);
-	    printf("\t%30s",cadena);
+	    fscanf(ap_BD_discos,"%[^\t]\t",cadena);
+	    printf("\tArtista:  %s\n",cadena);
+	    fscanf(ap_BD_discos,"%[^\t]\t",cadena);
+	    printf("\tNombre del disco: %s\n",cadena);
+	    fscanf(ap_BD_discos,"%f\t",&flotante);
+	    printf("\tCosto: %.2f\n",flotante);
 	    fscanf(ap_BD_discos,"%d\t",&entero);
-	    printf("\t%10d",entero);
-	    fscanf(ap_BD_discos,"%f\t\n",&flotante);
-	    printf("\t%.2f\n",flotante);
+	    printf("\tAño de lanzamiento: %d\n",entero);
+	    fscanf(ap_BD_discos,"%d\t",&entero);
+	    printf("\tUnidades compradas: %d\n",entero);
 	    ++i;
 	}
 	putchar('\n');
@@ -753,7 +998,139 @@ void mostrarDiscos( void ){
     getchar();
 }
 
-// Contenido de la funciON "nuevoDiscos"
+// Contenido de la funciON "mostrarDiscosInversa"
+void mostrarDiscosInversa( ListaDiscos *misDiscos ){
+    Disco *apt;
+    int i,j;
+    Booleano a = falso;
+    j = misDiscos->num_discos;
+    apt = misDiscos->ultimo;
+    if( apt ){
+	for(i = j; i >= 1; --i){
+	    printf("%2d",j - i + 1);
+	    printf("\tArtista: %s\n",apt->nombre_artista);
+	    printf("\tNombre del disco: %s\n",apt->nombre_disco);
+	    printf("\tCosto: %f\n",apt->precio);
+	    printf("\tAño de lanzamiento: %d\n",apt->anio_lanzamiento);
+	    printf("\tDiscos comprados: %d\t\n",apt->numero_compras);
+	    apt = apt->anterior;
+	}
+    }else{
+	printf("Parece que no hay discos en la base de datos\n");
+    }
+    getchar();
+    getchar();
+}
+
+// Contenido de la FunciOn "buscar disco"
+void buscarDisco( ListaDiscos *misDiscos ){
+    unsigned char cadena[60];
+    Disco *apt;
+    int i,j;
+    Booleano a = falso;
+    getchar();
+    printf("Ingrese el disco que desea buscar\n");
+    scanf("%[^\n]",cadena); 
+
+    j = misDiscos->num_discos;
+    apt = misDiscos->primero;
+    for(i = 1; i <= j && !a; ++i){
+	if( strcmp(apt->nombre_disco, cadena) == 0 ){
+	    printf("%2d",j - i + 1);
+	    printf("\tArtista: %s\n",apt->nombre_artista);
+	    printf("\tNombre del disco: %s\n",apt->nombre_disco);
+	    printf("\tCosto: %f\n",apt->precio);
+	    printf("\tAño de lanzamiento: %d\n",apt->anio_lanzamiento);
+	    printf("\tDiscos comprados: %d\t\n",apt->numero_compras);
+	    a = verdadero;
+	}
+	++i;
+	apt = apt->siguiente;
+    }
+    if( !a ){
+	printf("No se pudo encontrar el disco\n");
+    }
+    leerLinea();
+    getchar();
+    getchar();
+}
+
+// Contenido de la FunciOn "comprarDisco"
+void comprarDisco( Usuario *usr,ListaDiscos *misDiscos ){
+    unsigned char cadena[60];
+    Disco *apt;
+    int i,j;
+    Booleano a = falso;
+
+    leerLinea();
+    getchar();
+    printf("Ingrese el disco que desea comprar\n");
+    scanf("%[^\n]",cadena); 
+
+    j = misDiscos->num_discos;
+    apt = misDiscos->primero;
+    for(i = 1; i <= j && !a; ++i){
+	if( strcmp(apt->nombre_disco, cadena) == 0 ){
+	    printf("\tHas comprado el disco: %s\n",apt->nombre_disco);
+	    ++apt->numero_compras;
+	    a = verdadero;
+	    ++usr->numero_compras;
+	}
+	apt = apt->siguiente;
+    }
+    if( !a ){
+	printf("no se pudo encontrar el disco\n");	
+    }
+    getchar();
+    getchar();
+}
+
+// Contenido de la funciOn editarDisco
+void editarDisco( ListaDiscos *misDiscos ){
+    Booleano a = falso;
+    unsigned char cadena[60];
+    int opcion = -1;
+    Disco *apt;
+    int i;
+    getchar();
+    printf("Ingrese el nombre del disco que desea editar\n> ");
+    scanf("%[^\n]",cadena); 
+
+    apt = misDiscos->primero;
+    for(i = 1; i<= misDiscos->num_discos && !a; ++i){
+	if( strcmp(apt->nombre_disco, cadena) == 0 ){
+	    printf("Seleccióne la opción que desea modificar\n");
+	    printf("\t1. Precio\n\t2. Número de compras\n");
+	    do{
+		printf("> ");
+		scanf("%d",&opcion);
+		leerLinea();
+	    }while( opcion < 1 || opcion > 2 );
+
+	    if( opcion == 1 ){
+		printf("Ingrese el nuevo precio\n");
+		do{
+		    printf("> ");
+		    scanf("%f",&(apt->precio) );
+		    leerLinea();
+		}while( apt->precio < 0 );
+	    }else{
+		printf("Ingrese el nuevo número de compras\n");
+		do{
+		    printf("> ");
+		    scanf("%d",&(apt->numero_compras) );
+		    leerLinea();
+		}while( apt->numero_compras < 0);
+	    }
+	    getchar();
+	    a = verdadero;
+	}
+	apt = apt->siguiente;
+    }
+    escribirBD_Discos( misDiscos );
+}
+
+// Contenido de la funciOn "crearDisco"
 Disco * crearDisco(void){
     Disco *aux;
     
@@ -761,63 +1138,94 @@ Disco * crearDisco(void){
     aux->siguiente = NULL;
     aux->anterior = NULL;
 
+    getchar();
     printf("Ingrese el nombre del artista: \n");
     scanf("%60[^\n]",aux->nombre_artista);
-    leerLinea();
+    //printf("%s\n",aux->nombre_artista);
+    getchar();
     
     printf("Ingrese el titulo del disco: \n");
     scanf("%100[^\n]",aux->nombre_disco);
-    leerLinea();
+    //printf("%s\n",aux->nombre_disco);
+    getchar();
 
     do{
 	printf("Ingrese el costo del disco: \n");	
 	scanf("%f",&aux->precio);
+	//printf("%f\n",aux->precio);
+	leerLinea();
     }while( aux->precio <= 0 );
 
     do{
-	printf("Ingrese el año de lanzamiento del disco: \n");
+	printf("Ingrese el año de lanzamiento del disco (min 1900): \n");
 	scanf("%d",&aux->anio_lanzamiento);
+	//printf("%d\n",aux->anio_lanzamiento);
+	leerLinea();
     }while( aux->anio_lanzamiento < 1900 );
 
     do{
 	printf("Ingrese el número de ejemplares comprados: \n");
 	scanf("%d",&aux->numero_compras);
+	//printf("%d\n",aux->numero_compras);
+	leerLinea();
     }while( aux->precio < 0 );
     
     return aux;
 }
 
-// Contenido de la funciON "agregarDisco"
+// Contenido de la funciOn "agregarDisco"
 Booleano agregarDisco( Disco * nvo, ListaDiscos *misDiscos ){
-    Disco *apt = misDiscos->primero;
-    Booleano existente = falso;
+    Disco *apt;
+    Disco *aux;
+    Booleano a = falso; // Bandera para remediar la estupidez humana
     int i;
-    
-    for( i = 1; i <= misDiscos->num_discos ; ++i ){
-	if( strcmp( apt->nombre_disco, nvo->nombre_disco ) == 0 ){
-	    existente = verdadero;
-	}
-	apt = apt->siguiente;
-    }
-
-    if( existente ){
-	printf("Lo sentimos, el nombre de disco ya esta ocupado\n");	
-	getchar();
-	return falso;
-    }else{
-	if( misDiscos->num_discos != 0 ){
-	    misDiscos->ultimo->siguiente = nvo;
-	    nvo->anterior = misDiscos->ultimo;
-	    misDiscos->ultimo = nvo;
-	}else{
-	    misDiscos->primero = misDiscos->ultimo = nvo;    
-	}
-	
+    apt = misDiscos->primero; 
+    if( apt == NULL ){
+	misDiscos->primero = nvo;
+	misDiscos->ultimo = nvo;
 	++misDiscos->num_discos;
-	printf("disco añadido correctamente\n");
-	getchar();
-	return verdadero;	
+	return verdadero;
     }
+    // Primer caso, si el nuevo disco va acomodado en la primera
+    //  posiciOn
+    if( strcmp(nvo->nombre_disco, apt->nombre_disco) < 0 ){
+	nvo->siguiente = apt;
+	apt->anterior = nvo;
+	misDiscos->primero = nvo;
+    }else{
+	// Segundo caso, se recorren posiciones hasta encontrar el
+	//  lugar que le corresponde al usuario
+	for(i = 1; i <= misDiscos->num_discos && !a; ++i){
+	    //Si se llega a la posiciOn del usuario
+
+	    if( 
+		strcmp(nvo->nombre_disco, apt->nombre_disco) > 0 && 
+		apt->siguiente == NULL || ( apt->siguiente != NULL &&
+		strcmp(nvo->nombre_disco, apt->siguiente->nombre_disco) < 0)
+	      )
+	    {
+		aux = apt->siguiente;	
+		nvo->anterior = apt;
+		apt->siguiente = nvo;
+		if(aux){
+		    nvo->siguiente = aux;
+		    aux->anterior = nvo;
+		}else{
+		    misDiscos->ultimo = nvo;
+		}
+		a = verdadero;
+	    }else if(strcmp(apt->nombre_disco, nvo->nombre_disco) == 0 ){
+		printf("Lo sentimos, el disco ya existe en la base de datos\n");
+		getchar();
+		return falso;
+	    }
+	    apt = apt->siguiente;
+	}
+    }
+    ++misDiscos->num_discos;
+    printf("Disco añadido correctamente\n");
+    getchar();
+    return verdadero;	
 }
 
 // Contenido de la funciOn "eliminarDiscos"
@@ -825,67 +1233,52 @@ void eliminarDisco( Usuario *adm, ListaDiscos *misDiscos ){
     Usuario *usr = (Usuario *) malloc( sizeof(Usuario) );
     Disco *elim = (Disco *) malloc( sizeof(Disco) );
     Disco *aux;
+	
+    printf("Indique el disco que desea borrar\n");
+    leerLinea();
+    getchar();
+    scanf("%100[^\n]",elim->nombre_disco);
 
-    printf("A continuación confirme sus datos de administrador\n");
-    leerDatosUsuario( usr->cuenta, usr->contrasena );
+    int i;
+    aux = misDiscos->primero;
+    for( i = 1; i <= misDiscos->num_discos; ++i){
+	if( strcmp( elim->nombre_disco, aux->nombre_disco ) == 0 ){
+	    if( 
+		misDiscos->primero != aux &&
+		misDiscos->ultimo != aux
+	      )
+	    {
+		aux->anterior->siguiente = aux->siguiente;
+		aux->siguiente->anterior = aux->anterior;
+	    }
+	    else if( misDiscos->num_discos == 1 )
+	    {
+		misDiscos->primero = NULL;
+		misDiscos->ultimo = NULL;
+	    }
+	    else if( misDiscos->primero == aux )
+	    {
+		aux->siguiente->anterior = NULL; 
+		misDiscos->primero = misDiscos->primero->siguiente;
+	    }
+	    else // Si es el ultimo
+	    {
+		aux->anterior->siguiente = NULL;
+		misDiscos->ultimo = aux->anterior;
+	    }
 
-    if( 
-	strcmp(adm->cuenta,usr->cuenta) != 0 || 
-	strcmp(adm->contrasena,usr->contrasena) != 0
-      )
-    {
-	printf("Cuenta o contraseña incorrectas\n");
-	free(usr);
-	getchar();
-	getchar();
+	    free(elim);
+	    --misDiscos->num_discos;
+	    escribirBD_Discos( misDiscos );
+	    printf("Se ha eliminado un disco correctamente\n");
+	    getchar();
+	    getchar();
+	    return;
+	} 
+	aux = aux->siguiente;
     }
-    else
-    {
-	printf("Ahora indique el disco que desea borrar\n");
-	scanf("%100[^\n]",elim->nombre_disco);
-
-	int i;
-	free(usr);
-	aux = misDiscos->primero;
-	for( i = 1; i <= misDiscos->num_discos; ++i){
-	    if( strcmp( elim->nombre_disco, aux->nombre_disco ) == 0 ){
-		if( 
-		    misDiscos->primero != aux &&
-		    misDiscos->ultimo != aux
-		  )
-		{
-		    aux->anterior->siguiente = aux->siguiente;
-		    aux->siguiente->anterior = aux->anterior;
-		}
-		else if( misDiscos->num_discos == 0 )
-		{
-		    misDiscos = NULL;
-		    misDiscos->ultimo = NULL;
-		}
-		else if( misDiscos->primero == aux )
-		{
-		    aux->siguiente->anterior = NULL; 
-		    misDiscos->primero = misDiscos->primero->siguiente;
-		}
-		else // Si es el ultimo
-		{
-		    aux->anterior->siguiente = NULL;
-		    misDiscos->ultimo = aux->anterior;
-		}
-
-		free(elim);
-		--misDiscos->num_discos;
-		escribirBD_Discos( misDiscos );
-		printf("Se ha eliminado un disco correctamente\n");
-		getchar();
-		getchar();
-		return;
-	    } 
-	    aux = aux->siguiente;
-	}
-	getchar();
-	getchar();
-    }
+    getchar();
+    getchar();
 }
 
 // Contenido de la funciOn "leerLinea"
