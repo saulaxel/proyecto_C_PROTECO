@@ -18,7 +18,7 @@
 #ifdef _WIN32
 #   define CLEAR "cls"
 #   include <locale.h>
-    setlocale(LC_ALL,"Spanish_Mexico");
+    setlocale(LC_ALL, "Spanish_Mexico");
 #elif __unix__
 #   define CLEAR "clear"
 #else
@@ -30,10 +30,10 @@
 #define ARCHIVO_DISCOS "mis_discos.txt"
 
 #ifndef NDEBUG
-#   define z(s,c)                                                       \
+#   define z(s, c)                                                       \
     printf("%s %s\n%s %s\n",s->cuenta,c->cuenta,s->contrasena,c->contrasena)
 #else
-#   define z(s,c)
+#   define z(s, c)
 #endif
 
 // Estructura que simula booleanos
@@ -52,18 +52,29 @@ struct usuario
     unsigned char cuenta[LONGITUD_CUENTA+1];
     unsigned char contrasena[LONGITUD_CONTRASENA+1];
     unsigned char nombre_usuario[LONG_NOMBRE_PERSONA+1];
-    int edad;
-    int numero_compras;
+    int           edad;
+    int           numero_compras;
+
     struct usuario *siguiente;
     struct usuario *anterior;
 };
-Usuario admin = {NOM_ADMIN,CONTRA_ADMIN,"Martínez Ortiz Saúl Axel",20,0,NULL,NULL};
+
+static Usuario admin = {
+    .cuenta         = NOM_ADMIN,
+    .contrasena     = CONTRA_ADMIN,
+    .nombre_usuario = "Martínez Ortiz Saúl Axel",
+    .edad           = 20,
+    .numero_compras = 0,
+    .siguiente      = NULL,
+    .anterior       = NULL
+};
 
 typedef struct listaUsuarios ListaUsuarios;
 struct listaUsuarios
 {
     Usuario *primero;
     Usuario *ultimo;
+
     unsigned short num_usuarios;
 };
 
@@ -76,9 +87,10 @@ struct disco
 {
     unsigned char nombre_artista[LONG_NOMBRE_PERSONA+1];
     unsigned char nombre_disco[LONG_NOMBRE_DISCO+1];
-    float precio;
-    int anio_lanzamiento;
-    int numero_compras;
+    float         precio;
+    int           anio_lanzamiento;
+    int           numero_compras;
+
     struct disco *anterior;
     struct disco *siguiente;
 };
@@ -87,7 +99,8 @@ typedef struct listaDiscos ListaDiscos;
 struct listaDiscos
 {
     Disco *primero;
-    Disco  *ultimo;
+    Disco *ultimo;
+
     unsigned short num_discos;
 };
 
@@ -95,7 +108,7 @@ struct listaDiscos
 
 /**
  * FunciOn menu: apuntador a estructura Usuario -> vacio
- * DescripciOn: Desglosa las opciones para que el 
+ * DescripciOn: Desglosa las opciones para que el
  *  usuario sepa de donde elejir
  **/
 void menu(Usuario *usr);
@@ -103,7 +116,7 @@ void menu(Usuario *usr);
 /**
  * FunciOn establecerUsuario: apuntador a cadena,
  apuntador a estructura ListaUsuarios -> vacio
- * DescripciOn: Manda a llamar a la funciOn que lee los usuarios de la 
+ * DescripciOn: Manda a llamar a la funciOn que lee los usuarios de la
  * base de datos. En caso de no haber base de datos este la crea
  * con los datos de administrador.
  **/
@@ -158,7 +171,7 @@ void cambiarUsuario(Usuario *usr, ListaUsuarios *misUsuarios);
 
 /**
  * FunciOn leerDatosUsuario: apuntador a cadena,apuntador a cadena -> vacio
- * DescipciOn: Recibe dos apuntadores a cadena (usr y contra) en los 
+ * DescipciOn: Recibe dos apuntadores a cadena (usr y contra) en los
  *  que almacenarA los datos que pide desde consola
  **/
 void leerDatosUsuario(unsigned char *usr, unsigned char *contra);
@@ -175,7 +188,7 @@ Booleano existeUsuario(Usuario *usr, ListaUsuarios *misUsuarios);
 /**
  * FunciOn crearUsuario: vacio -> apuntador a Usuario
  * DescripciOn: Crea un usuario nuevo por medio de memoria dinAmica
- *  e inicializa sus datos con informaciOn pedida desde la consola 
+ *  e inicializa sus datos con informaciOn pedida desde la consola
  **/
 Usuario * crearUsuario(void);
 
@@ -183,7 +196,7 @@ Usuario * crearUsuario(void);
  * FunciOn agregarUsuario: apuntador a estructura Usuario,
  *             apuntador a estructura ListaUsuarios ->
  *             enumeraciOn Booleano
- * DescripciOn: Recibe un usuario nuevo y lo almacena en la lista 
+ * DescripciOn: Recibe un usuario nuevo y lo almacena en la lista
  *  de usuarios si no existe su cuenta
  **/
 Booleano agregarUsuario(Usuario *usr, ListaUsuarios *misUsuarios);
@@ -193,7 +206,7 @@ Booleano agregarUsuario(Usuario *usr, ListaUsuarios *misUsuarios);
  *              apuntador a estructura ListaUsuarios -> vacio
  * DescripciOn: Hace una busqueda lineal de la cadena recibida
  *  sobre las cuentas de los usuarios y en la primera coincidencia
- *  eliminarA el usuario actual de la lista y de la memoria 
+ *  eliminarA el usuario actual de la lista y de la memoria
  *  regresando a la funciOn que lo llamo verdadero, o falso al no
  *  encontrar ninguna concidencia
  + PS: No elimina al administrador(por ello lo recibe)
@@ -209,7 +222,7 @@ void leerBD_Discos(ListaDiscos *misDiscos);
 
 /**
  * FunciOn escribirBD_Discos: esctuctura ListaDiscos -> vacio
- * DescripciOn: Escribe los datos de la lista de discos en 
+ * DescripciOn: Escribe los datos de la lista de discos en
  *  el archivo de base de datos de discos sobreescribiendola
  *  en cada ocaciOn
  **/
@@ -217,7 +230,7 @@ void escribirBD_Discos(ListaDiscos *misDiscos);
 
 /**
  * FunciOn mostrarDiscos: vacio -> vacio
- * DescripciOn: Imprime en pantalla los datos de la base de 
+ * DescripciOn: Imprime en pantalla los datos de la base de
  *  datos de los discos
  **/
 void mostrarDiscos(void);
@@ -231,7 +244,7 @@ void mostrarDiscosInversa(ListaDiscos *misDiscos);
 
 /**
  * FunciOn buscarDisco: apuntador a estructura ListaUsuarios -> vacio
- * DescripciOn: Imprime los datos de un disco buscado por 
+ * DescripciOn: Imprime los datos de un disco buscado por
  *  medio de su nombre.
  */
 void buscarDisco(ListaDiscos *misDiscos);
@@ -251,7 +264,7 @@ void editarDisco(ListaDiscos *misDiscos);
 
 /**
  * FunciOn crearDisco: vacio -> apuntador a Disco
- * DescripciOn: Se encarga de instanciar un nuevo disco por 
+ * DescripciOn: Se encarga de instanciar un nuevo disco por
  *  medio de memoria dinAmica e inicializado con datos pedidos
  *  por consola para al final regresar una referencia al mismo.
  **/
@@ -268,9 +281,9 @@ Booleano agregarDisco(Disco * nvo, ListaDiscos *misDiscos);
 /**
  * FunciOn eliminarDisco: apuntador a cadena,
  *                           estructura ListaDiscos -> vacio
- * DescripciOn: Hace una busqueda lineal de la cadena recibida en 
+ * DescripciOn: Hace una busqueda lineal de la cadena recibida en
  *  comparaciOn con los nombres de los discos, borrando el disco
- *  coincidente y regresando verdadero en el proceso, o de lo contrario 
+ *  coincidente y regresando verdadero en el proceso, o de lo contrario
  *  regresando falso al no encontrar coincidencias.
  **/
 void eliminarDisco(Usuario *adm, ListaDiscos *misDiscos);
@@ -383,9 +396,9 @@ int main(void)
                 {
                     printf("Lo sentimos, se ha alcanzado el máximo número\n");
                     printf("de usuarios\n");
-                    getchar();
                 }
-                getchar();
+
+                leerLinea(NULL);
                 break;
 
             case 12:
@@ -407,9 +420,8 @@ int main(void)
                 {
                     printf("Lo sentimos, se ha alcanzado el máximo número\n");
                     printf("de discos\n");
-                    getchar();
                 }
-                getchar();
+                leerLinea(NULL);
                 break;
 
             case 14:
@@ -426,12 +438,12 @@ int main(void)
                 leerLinea(NULL);
                 escribirBD_Usuarios(&misUsuarios);
                 escribirBD_Discos(&misDiscos);
-                getchar();
+                leerLinea(NULL);
         }
     } while ( opcion != 16 );
 
 
-    getchar();
+    leerLinea(NULL);
     return 0;
 }
 
@@ -522,7 +534,7 @@ Usuario * establecerUsuario(ListaUsuarios *misUsuarios)
         else
         {
             printf("Vuelva pronto\n");
-            getchar();
+            leerLinea(NULL);
             exit(0);
         }
     }
@@ -539,7 +551,8 @@ void leerBD_Usuarios(ListaUsuarios *misUsuarios)
     Usuario *nvo;
 
     printf("Leyendo la base de datos de usuarios...\n");
-    getchar();
+    leerLinea(NULL);
+
     if ( ap_BD_usuarios )
     {
 
@@ -562,7 +575,7 @@ void leerBD_Usuarios(ListaUsuarios *misUsuarios)
         //int i;
         //Usuario *aux = misUsuarios->primero;
         //for( i = 1; i <= misUsuarios->num_usuarios; ++i ){
-        //printf("%d %s %s\n", i, aux->cuenta, aux->contrasena); 
+        //printf("%d %s %s\n", i, aux->cuenta, aux->contrasena);
         //aux = aux->siguiente;
         //}
 
@@ -662,7 +675,7 @@ void mostrarUsuariosInversa(ListaUsuarios *misUsuarios)
     }
     else
     {
-        printf("Parece que no hay usuarios registrados\n"); 
+        printf("Parece que no hay usuarios registrados\n");
     }
     leerLinea(NULL);
 }
@@ -685,7 +698,7 @@ void modificarInfo(Usuario *usr)
     if ( strcmp(usr->cuenta, admin.cuenta) == 0 )
     {
         printf("No puedes modificar los datos del administrador\n");
-        getchar();
+        leerLinea(NULL);
         return;
     }
 
@@ -698,7 +711,7 @@ void modificarInfo(Usuario *usr)
         scanf("%hd",&opcion);
         leerLinea(NULL);
     } while( opcion < 1 || opcion > 3 );
-    getchar();
+    leerLinea(NULL);
 
     if ( opcion == 1 )
     {
@@ -754,7 +767,7 @@ void cambiarUsuario(Usuario *usr, ListaUsuarios *misUsuarios)
     }
 
     if ( cambio )
-        printf("Cambio de usuario correctamente realizado\n"); 
+        printf("Cambio de usuario correctamente realizado\n");
     else
         printf("El cambio de usuario ha fallado\n");
 
@@ -788,10 +801,10 @@ Booleano existeUsuario(Usuario *usr, ListaUsuarios *misUsuarios)
         //printf("Las cuentas son: %s %s\n", usr->cuenta, aux->cuenta);
         //printf("El resultado es: %d\n", strcmp(usr->cuenta, aux->cuenta) );
 
-        //printf("Las contraseñas son: %s %s\n", 
+        //printf("Las contraseñas son: %s %s\n",
         //  usr->contrasena,
         //  aux->contrasena);
-        //printf("El resultado es: %d\n", 
+        //printf("El resultado es: %d\n",
         //  strcmp(usr->contrasena, aux->contrasena) );
         //if( strcmp(usr->contrasena, aux->contrasena) ){
         //    printf("No hay correspondencia\n");
@@ -822,13 +835,13 @@ Usuario * crearUsuario(void)
     aux->numero_compras = 0;
 
     leerDatosUsuario(aux->cuenta, aux->contrasena);
-    getchar();
+    leerLinea(NULL);
     printf("Ingrese el nombre completo del usuario:\n");
     scanf("%[^\n]",aux->nombre_usuario);
-    getchar();
+    leerLinea(NULL);
 
     do {
-        printf("Ingrese la edad del usuario: \n");	
+        printf("Ingrese la edad del usuario: \n");
         scanf("%d",&aux->edad);
         //printf("%d\n",aux->edad);
         leerLinea(NULL);
@@ -869,12 +882,12 @@ Booleano agregarUsuario(Usuario *nvo, ListaUsuarios *misUsuarios)
             //Si se llega a la posiciOn del usuario
 
             if(
-                    strcmp(nvo->cuenta, apt->cuenta) > 0 && 
+                    strcmp(nvo->cuenta, apt->cuenta) > 0 &&
                     apt->siguiente == NULL || ( apt->siguiente != NULL &&
                         strcmp(nvo->cuenta, apt->siguiente->cuenta) < 0)
               )
             {
-                aux = apt->siguiente;	
+                aux = apt->siguiente;
                 nvo->anterior = apt;
                 apt->siguiente = nvo;
                 if ( aux )
@@ -891,7 +904,7 @@ Booleano agregarUsuario(Usuario *nvo, ListaUsuarios *misUsuarios)
             else if (strcmp(apt->cuenta, nvo->cuenta) == 0 )
             {
                 printf("Lo sentimos, el nombre de usuario ya está ocupado\n");
-                getchar();
+                leerLinea(NULL);
                 return falso;
             }
             apt = apt->siguiente;
@@ -899,8 +912,8 @@ Booleano agregarUsuario(Usuario *nvo, ListaUsuarios *misUsuarios)
     }
     ++misUsuarios->num_usuarios;
     printf("Usuario añadido correctamente\n");
-    getchar();
-    return verdadero;	
+    leerLinea(NULL);
+    return verdadero;
 }
 
 // Contenido de la funciOn "eliminarUsuario"
@@ -960,8 +973,7 @@ void eliminarUsuario(Usuario *adm, ListaUsuarios *misUsuarios)
         }
         aux = aux->siguiente;
     }
-    getchar();
-    getchar();
+    leerLinea(NULL);
 }
 
 // Contenido de la funciOn "leerBD_Discos"
@@ -971,7 +983,7 @@ void leerBD_Discos( ListaDiscos *misDiscos )
     Disco *nvo;
 
     printf("Leyendo la base de datos de discos...\n");
-    getchar();
+    leerLinea(NULL);
 
     if( ap_BD_discos )
     {
@@ -1012,7 +1024,7 @@ void leerBD_Discos( ListaDiscos *misDiscos )
     //  - Discos repetidos
     //  - Etc
     escribirBD_Discos(misDiscos);
-    getchar();
+    leerLinea(NULL);
 }
 
 // Contenido de la funciOn "escribirBD_Discos"
@@ -1030,7 +1042,7 @@ void escribirBD_Discos(ListaDiscos *misDiscos)
     //aux->anio_lanzamiento,
     //aux->numero_compras
     //);
-    //aux = aux->siguiente;	
+    //aux = aux->siguiente;
     //}
     //aux = misDiscos->primero;
     if ( aux )
@@ -1086,8 +1098,7 @@ void mostrarDiscos(void)
     {
         printf("Parece que no hay discos registrados\n");
     }
-    getchar();
-    getchar();
+    leerLinea(NULL);
 }
 
 // Contenido de la funciON "mostrarDiscosInversa"
@@ -1115,8 +1126,7 @@ void mostrarDiscosInversa(ListaDiscos *misDiscos)
     {
         printf("Parece que no hay discos en la base de datos\n");
     }
-    getchar();
-    getchar();
+    leerLinea(NULL);
 }
 
 // Contenido de la FunciOn "buscar disco"
@@ -1126,9 +1136,9 @@ void buscarDisco(ListaDiscos *misDiscos)
     Disco *apt;
     int j;
     Booleano a = falso;
-    getchar();
+    leerLinea(NULL);
     printf("Ingrese el disco que desea buscar\n");
-    scanf("%[^\n]",cadena); 
+    scanf("%[^\n]",cadena);
 
     j = misDiscos->num_discos;
     apt = misDiscos->primero;
@@ -1165,7 +1175,7 @@ void comprarDisco(Usuario *usr,ListaDiscos *misDiscos)
     leerLinea(NULL);
 
     printf("Ingrese el disco que desea comprar\n");
-    scanf("%[^\n]",cadena); 
+    scanf("%[^\n]",cadena);
 
     j = misDiscos->num_discos;
     apt = misDiscos->primero;
@@ -1182,10 +1192,9 @@ void comprarDisco(Usuario *usr,ListaDiscos *misDiscos)
     }
 
     if ( !a ) {
-        printf("no se pudo encontrar el disco\n");	
+        printf("no se pudo encontrar el disco\n");
     }
-    getchar();
-    getchar();
+    leerLinea(NULL);
 }
 
 // Contenido de la funciOn editarDisco
@@ -1195,12 +1204,13 @@ void editarDisco(ListaDiscos *misDiscos)
     unsigned char cadena[60];
     int opcion = -1;
     Disco *apt;
-    getchar();
+
+    leerLinea(NULL);
     printf("Ingrese el nombre del disco que desea editar\n> ");
-    scanf("%[^\n]",cadena); 
+    scanf("%[^\n]", cadena);
 
     apt = misDiscos->primero;
-    for(int i = 1; i <= misDiscos->num_discos && !a; ++i)
+    for (int i = 1; i <= misDiscos->num_discos && !a; ++i)
     {
         if( strcmp(apt->nombre_disco, cadena) == 0 )
         {
@@ -1230,7 +1240,7 @@ void editarDisco(ListaDiscos *misDiscos)
                     leerLinea(NULL);
                 } while( apt->numero_compras < 0 );
             }
-            getchar();
+            leerLinea(NULL);
             a = verdadero;
         }
         apt = apt->siguiente;
@@ -1247,19 +1257,19 @@ Disco * crearDisco(void)
     aux->siguiente = NULL;
     aux->anterior = NULL;
 
-    getchar();
+    leerLinea(NULL);
     printf("Ingrese el nombre del artista: \n");
     scanf("%60[^\n]",aux->nombre_artista);
     //printf("%s\n",aux->nombre_artista);
-    getchar();
+    leerLinea(NULL);
 
     printf("Ingrese el titulo del disco: \n");
     scanf("%100[^\n]",aux->nombre_disco);
     //printf("%s\n",aux->nombre_disco);
-    getchar();
+    leerLinea(NULL);
 
     do {
-        printf("Ingrese el costo del disco: \n");	
+        printf("Ingrese el costo del disco: \n");
         scanf("%f",&aux->precio);
         //printf("%f\n",aux->precio);
         leerLinea(NULL);
@@ -1315,12 +1325,12 @@ Booleano agregarDisco(Disco * nvo, ListaDiscos *misDiscos)
             //Si se llega a la posiciOn del usuario
 
             if (
-                    strcmp(nvo->nombre_disco, apt->nombre_disco) > 0 && 
+                    strcmp(nvo->nombre_disco, apt->nombre_disco) > 0 &&
                     apt->siguiente == NULL || ( apt->siguiente != NULL &&
                         strcmp(nvo->nombre_disco, apt->siguiente->nombre_disco) < 0)
                )
             {
-                aux = apt->siguiente;	
+                aux = apt->siguiente;
                 nvo->anterior = apt;
                 apt->siguiente = nvo;
                 if ( aux )
@@ -1337,7 +1347,7 @@ Booleano agregarDisco(Disco * nvo, ListaDiscos *misDiscos)
             else if ( strcmp(apt->nombre_disco, nvo->nombre_disco) == 0 )
             {
                 printf("Lo sentimos, el disco ya existe en la base de datos\n");
-                getchar();
+                leerLinea(NULL);
                 return falso;
             }
             apt = apt->siguiente;
@@ -1345,8 +1355,8 @@ Booleano agregarDisco(Disco * nvo, ListaDiscos *misDiscos)
     }
     ++misDiscos->num_discos;
     printf("Disco añadido correctamente\n");
-    getchar();
-    return verdadero;	
+    leerLinea(NULL);
+    return verdadero;
 }
 
 // Contenido de la funciOn "eliminarDiscos"
@@ -1358,7 +1368,6 @@ void eliminarDisco(Usuario *adm, ListaDiscos *misDiscos)
 
     printf("Indique el disco que desea borrar\n");
     leerLinea(NULL);
-    getchar();
     scanf("%100[^\n]",elim->nombre_disco);
 
     aux = misDiscos->primero;
@@ -1381,10 +1390,10 @@ void eliminarDisco(Usuario *adm, ListaDiscos *misDiscos)
             }
             else if ( misDiscos->primero == aux )
             {
-                aux->siguiente->anterior = NULL; 
+                aux->siguiente->anterior = NULL;
                 misDiscos->primero = misDiscos->primero->siguiente;
             }
-            else // Si es el ultimo
+            else // Si es el Ultimo
             {
                 aux->anterior->siguiente = NULL;
                 misDiscos->ultimo = aux->anterior;
@@ -1394,8 +1403,7 @@ void eliminarDisco(Usuario *adm, ListaDiscos *misDiscos)
             --misDiscos->num_discos;
             escribirBD_Discos(misDiscos);
             printf("Se ha eliminado un disco correctamente\n");
-            getchar();
-            getchar();
+            leerLinea(NULL);
             return;
         }
         aux = aux->siguiente;
